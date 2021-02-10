@@ -54,8 +54,10 @@ lmt0 = function(x){
   ifelse(x<0, 0, x)
 }
 
+
+
 #shiny specific==================================================================
-#
+
 list = list(closable = F, 
             collapsed = F, 
             collapsible = T, 
@@ -63,6 +65,18 @@ list = list(closable = F,
             solidHeader = T, 
             status = "primary")
 
+#takes master shiny input list and extracts list elements by name match 
+#string can take "|" operator 
+get_list_items = function(input_list, suffix = NA, string, purrr = T){
+  if (purrr){
+    input_list[names(input_list)[(str_detect(names(input_list) , paste0("_", suffix))+str_detect(names(input_list), string))==2]]
+  } else {
+    input_list[names(input_list)[str_detect(names(input_list), string)]]
+  }
+}
+
+#makes common box that works for most purposes 
+#objects need to be in a list
 boxPlus_common = function(title = NA, object_in_box = NA){
   boxPlus(title = title, 
           closable = F, 

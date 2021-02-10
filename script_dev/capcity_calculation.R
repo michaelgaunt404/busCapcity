@@ -68,8 +68,8 @@ shiny_input_bus_2_spare = .57 #in percent
 shiny_input_pass_2_num = 600 #total serviced for simulation
 
 bus_inputs_2 = list(
-  bus_line = shiny_input_bus_2_route,
-  bus_num = floor(simul_time/shiny_input_bus_2_headway), #calcs bus num/ids from headway and simul period
+  #bus_line = shiny_input_bus_2_route,
+  # bus_num = floor(simul_time/shiny_input_bus_2_headway), #calcs bus num/ids from headway and simul period
   bus_arrvl_sd = shiny_input_bus_2_headway_sd,
   bus_arrvl_shdl = shiny_input_bus_2_headway,
   bus_pass_empty_num = floor(shiny_input_bus_2_capacity*shiny_input_bus_2_spare),
@@ -205,12 +205,113 @@ total %>%
   
   
 
+create_buses(RVlist)
 
 
-  data.frame(
-    names = names(RVlist),
-    values = unlist(RVlist, use.names = FALSE)
-  )
+RVlist = get_bus_inputs(RVlist, 3)
+ 
+
+get_bus_inputs =  function(rvList, num_of_buses){
+  list(1:num_of_buses) %>%  
+    pmap(function(x) 
+      rvList[names(rvList)[(str_detect(names(rvList) , paste0("_", x))+str_detect(names(rvList) , "bus_"))==2]]
+    ) %>% 
+    map(
+      ~{names(.)<- names(.) %>%  str_sub(end = -3);.} #removes suffixs from input names
+    ) %>% 
+    map_dfr(bind_rows) %>% #combines to single df 
+    as.data.frame() %>% 
+    mutate(bus_num = floor(simul_time/bus_route_headway),
+           bus_pass_empty_num = floor(as.numeric(bus_route_size)*(bus_route_cap/100)),
+           bus_pass_empty_sd = 0, #zero variance in empty
+           bus_pass_alight_num = 0, #zero passengers alighting
+           bus_pass_alight_sd = 0,
+           bus_exit_condition = 2) %>%
+    group_by(bus_line) %>% #perfroms old "create_buses()" function 
+    nest(cols = !bus_line) %>%
+    mutate(create_bus = map(cols, create_bus)) %>%
+    unnest(everything()) %>%  
+    arrange(bus_arrvl_actl)
+}
+
+
+
+rvList = yolo
+num_of_buses = 4
+
+names(rvList) %>%  
+  sort
+
+list(#pass_num = shiny_input_pass_1_num,
+     #pass_line = shiny_input_bus_1_route,
+     pass_headway_sd = shiny_input_pass_headway_sd, 
+     pass_headway = simul_time/shiny_input_pass_1_num*60, #convert to seconds  
+     pass_board = shiny_input_pass_board,
+     pass_board_sd = shiny_input_pass_board_sd)
+
+get_pass_inputs =  function(rvList, num_of_buses){
+  list(1:num_of_buses) %>%
+    pmap(function(x)
+      rvList[names(rvList)[(str_detect(names(rvList) , paste0("_", x))+str_detect(names(rvList) , "pass_|bus_line_"))==2]]
+    ) %>%
+    map(
+      ~{names(.)<- names(.) %>%  str_sub(end = -3);.} #removes suffixs from input names
+    ) %>%
+    map_dfr(bind_rows) %>% #combines to single df
+    as.data.frame() %>%
+    mutate(
+      pass_headway = simul_time/shiny_input_pass_1_num*60
+      
+      
+      
+    ) %>%
+#     group_by(bus_line) %>% #perfroms old "create_buses()" function 
+#     nest(cols = !bus_line) %>%
+#     mutate(create_bus = map(cols, create_bus)) %>%
+#     unnest(everything()) %>%  
+#     arrange(bus_arrvl_actl)
+# }
+# 
+# 
+# 
+# 
+# 
+# 
+# library(billboarder)
+# # save = RVlist
+# bolo_tmp = bolo %>%  
+#   arrange(bus_arrvl_actl) %>%  
+#   mutate(bus_order = rownames(.) %>%  
+#            as.numeric())   
+#   billboarder() %>% 
+#   bb_scatterplot(data = bolo_tmp, x = "bus_arrvl_actl", y = "bus_order", group = "bus_line") %>% 
+#   bb_axis(x = list(tick = list(fit = FALSE))) %>%
+#   bb_point(r = 8)
+#   
+# df <- data.frame(
+#   var = c("A", "B"),
+#   count = c(457, 987)
+# )
+# 
+# billboarder() %>% 
+#   bb_piechart(data = df)
+# 
+# billboarder() %>% 
+#   bb_scatterplot(data = iris, x = "Sepal.Length", y = "Sepal.Width", group = "Species") %>% 
+#   bb_tooltip(
+#     format = list(
+#       # skip the title in tooltip
+#       title = htmlwidgets::JS("function() {return 'title';}"),
+#       name = htmlwidgets::JS("function(name, ratio, id, index) {return '';}"),
+#       value = htmlwidgets::JS("function(value, ratio, id, index) {return id;}")
+#     )
+#   )
+#   
   
-  names(RVlist)[str_detect(names(RVlist) , "bus_route")]
-           
+
+
+
+
+
+  
+  

@@ -22,10 +22,10 @@ app_ui <- function(request) {
         rightSidebarIcon = "gears"
       ),
       #footer==============================================================================================================================================================================
-      footer = dashboardFooter(
-        left = "By Michael Gaunt",
-        right = "Seattle, 2021"
-      ),
+      # footer = dashboardFooter(
+      #   left = "By Michael Gaunt",
+      #   right = "Seattle, 2021"
+      # ), #this has been messing up and the footer ends up everywhere
       #sidebar==============================================================================================================================================================================
       sidebar = dashboardSidebar(width  = 200,
                                  sidebarMenu(id = "tabs",
@@ -34,11 +34,11 @@ app_ui <- function(request) {
                                                       icon = icon("toolbox"),
                                                       startExpanded = T,
                                                       selected = T),
-                                             menuItem("Place Holder 1", 
-                                                      tabName = "ph_1", 
+                                             menuItem("Simulation Results", 
+                                                      tabName = "simul_result", 
                                                       icon = icon("stream"),
                                                       startExpanded = F),
-                                             menuItem("Place Holder 2", 
+                                             menuItem("Passengers Left Behind", 
                                                       tabName = "ph_2", 
                                                       icon = icon("table"),
                                                       startExpanded = F)
@@ -50,20 +50,44 @@ app_ui <- function(request) {
           #scope_db tab=========================================================
           tabItem("db",
                   col_4(
-                    mod_simulation_inputs_ui("global_inputs")
+                    mod_simulation_inputs_ui("global_inputs"),
+                    boxPlus_common(title = "Bus Route Inputs", 
+                                   list(
+                                     actionButton("bus_input_go", "Confirm Bus Input"),
+                                     actionButton("bus_simulation_go", "Run Simulation")
+                                   )
+                    )
                   ),
                   col_8(
-                    # mod_bus_inputs_ui("bus_inputs_ui_1")
-                    uiOutput("bus")
+                    boxPlus_common(
+                      title = "Bus Route Inputs",
+                      uiOutput("bus")
+                    ),
+                    splitLayout(
+                      cellWidths = c("50%", "50%"),
+                      boxPlus_common(title = "Bus Route Input Summary",
+                                     DT::dataTableOutput("smmry_bus_routes")
+                      ),
+                      boxPlus_common(title = "Bus Route Input Summary",
+                                    plotlyOutput("pass_arrvl_dist")
+                      )
+                    )
                   )
           ), 
           #timeline tab=========================================================
-          tabItem("ph_1",
-                  spacer_row(20)          
+          tabItem("simul_result",
+                  col_4(
+                    DT::dataTableOutput("results_summary_stats")%>%  withSpinner()
+                  ),
+                  col_8(
+                    DT::dataTableOutput("results_bus_assign") %>%  withSpinner()
+                  )        
           ), 
           #data_center tab======================================================
-          tabItem("ph_2 ",
-                  spacer_row(20)
+          tabItem("ph_2",
+                  col_4(
+                    DT::dataTableOutput("results_pass_not_picked_up") %>%  withSpinner()
+                  )     
           )
         )
       ),
@@ -111,7 +135,7 @@ golem_add_external_resources <- function(){
   add_resource_path(
     'www', app_sys('app/www')
   )
- 
+  
   tags$head(
     favicon(),
     bundle_resources(

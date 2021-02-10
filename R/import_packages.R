@@ -1,5 +1,9 @@
 #' @import golem
 #' @import purrr
+#' @import tidyr
+#' @import tidyverse
+#' @import plotly
+#' @import dplyr
 #' @import ggplot2
 #' @import DT
 #' @import magrittr
