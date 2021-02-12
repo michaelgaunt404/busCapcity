@@ -66,32 +66,58 @@ quick_dist = function(num, sd, floor = F){
 
 #df creation====================================================================
 #create dataframe for a singular bus route
+
 create_bus = function(bus) {
   data.frame(bus_id = seq(1:bus$bus_num), 
              bus_arrvl_schl = bus$bus_route_headway,
              bus_pass_empty = (bus$bus_pass_empty_num + quick_dist(bus$bus_num, bus$bus_pass_empty_sd, T)) %>% #number of empty seats per bus with sd
                lmt0(),
              bus_pass_alight = (bus$bus_pass_alight_num + quick_dist(bus$bus_num, bus$bus_pass_alight_sd, T)) %>% #number of people leaving bus with sd
-               lmt0(), 
+               lmt0(),
+             bus_service_time_alight = sum(abs(quick_dist(bus$bus_pass_alight_num, bus$bus_pass_alight_sd))+bus$bus_board_alight),
              bus_obstrct_time = 0 #seconds = place holder for conditional extra delays
              ) %>%  
     mutate(
            bus_surplus_seats = bus_pass_empty+bus_pass_alight,
            bus_arrvl_schl = cumsum(bus_arrvl_schl)*60,
            bus_arrvl_actl = bus_arrvl_schl+quick_dist(bus$bus_num, bus$bus_route_headway_sd)*60
-           ) 
+           )
 }
 
-#creates dataframe with all buses and their meta-data
-create_buses = function(bus_list){
-  bus_list %>%
-    map(create_bus) %>%
-    reduce(bind_rows) %>%
-    arrange(bus_arrvl)
+get_bus_inputs =  function(rvList, num_of_buses, input_list){
+  #perfroms a few steps 
+  #->grabs all "bus_" inupts and groups by"_#" suffix
+  #->first map removes suffixs
+  #->mutate sec. creates inputs per bus route
+  #->"group_by()" and down makes buses using purrr functionality
+  list(1:num_of_buses) %>%  
+    pmap(function(x) 
+      get_list_items(rvList, string = "bus_", suffix = x)
+    ) %>% 
+    map(
+      ~{names(.)<- names(.) %>%  str_sub(end = -3);.}
+    ) %>% 
+    map_dfr(bind_rows) %>%  
+    mutate(bus_num = floor(input_list[["simul_duration"]]/bus_route_headway),
+           bus_pass_empty_num = floor(as.numeric(bus_route_size)*(bus_route_cap/100)),
+           bus_pass_empty_sd = 0, #zero variance in empty
+           bus_pass_alight_num = floor(as.numeric(bus_route_size)*(bus_route_num_alight /100)), #zero passengers alighting
+           bus_pass_alight_sd = floor(as.numeric(bus_route_size)*(bus_route_num_alight_sd /100)),
+           bus_board_alight = input_list[["pass_board"]],
+           bus_exit_condition = 2) %>%
+    group_by(bus_line) %>%
+    nest(cols = !bus_line) %>%
+    mutate(create_bus = map(cols, create_bus)) %>%
+    unnest(everything()) %>% 
+    ungroup() %>% 
+    mutate(bus_line_id = paste0(bus_line, "_", bus_id)) %>% 
+    arrange(bus_arrvl_actl) 
+  
 }
 
 #create dataframe for a singular bus route's passengers
 create_pass = function(pass, simul_time){
+
   tmp_num_pass = round(pass$bus_route_pass*(simul_time/60))
   
   data.frame(pass_id = seq(1: tmp_num_pass),
@@ -102,48 +128,7 @@ create_pass = function(pass, simul_time){
            pass_arrvl = case_when(pass_arrvl <= 0~0,
                                   pass_arrvl > 0~pass_arrvl)) %>%
     arrange(pass_arrvl)
-}
 
-# creates dataframe with all bus routes' passengers and their meta-data
-create_people = function(pass_list){
-  pass_list %>%
-    map(create_pass) %>%
-    reduce(bind_rows) %>%
-    arrange(pass_arrvl)
-}
-
-get_bus_inputs =  function(rvList, num_of_buses, simul_time){
-  #perfroms a few steps 
-  #->grabs all "bus_" inupts and groups by"_#" suffix
-  #->first map removes suffixs
-  #->mutate sec. creates inputs per bus route
-  #->"group_by()" and down makes buses using purrr functionality
-  
-  #NOTE: have to change third input to list with time and other inputs (CONDITION)
-  
-  list(1:num_of_buses) %>%  
-    pmap(function(x) 
-      get_list_items(rvList, string = "bus_", suffix = x)
-      # rvList[names(rvList)[(str_detect(names(rvList) , paste0("_", x))+str_detect(names(rvList) , "bus_"))==2]]
-    ) %>% 
-    map(
-      ~{names(.)<- names(.) %>%  str_sub(end = -3);.}
-    ) %>% 
-    map_dfr(bind_rows) %>%  
-    mutate(bus_num = floor(simul_time/bus_route_headway),
-           bus_pass_empty_num = floor(as.numeric(bus_route_size)*(bus_route_cap/100)),
-           bus_pass_empty_sd = 0, #zero variance in empty
-           bus_pass_alight_num = 0, #zero passengers alighting
-           bus_pass_alight_sd = 0,
-           bus_exit_condition = 2) %>%
-    group_by(bus_line) %>%
-    nest(cols = !bus_line) %>%
-    mutate(create_bus = map(cols, create_bus)) %>%
-    unnest(everything()) %>%  
-    mutate(bus_line_id = paste0(bus_line, "_", bus_id)) %>% 
-    arrange(bus_arrvl_actl) %>% 
-    as.data.frame() 
-  
 }
 
 get_pass_inputs =  function(rvList, num_of_buses, pass_input_list){
@@ -157,29 +142,31 @@ get_pass_inputs =  function(rvList, num_of_buses, pass_input_list){
     map_dfr(bind_rows) %>% #combines to single df
     mutate(
       pass_headway = 1/(bus_route_pass/3600),
-      pass_board = pass_input_list[[2]],
-      pass_board_sd = pass_input_list[[3]]
+      pass_board = pass_input_list[["pass_board"]],
+      pass_board_sd = pass_input_list[["pass_board_sd"]]
     ) %>%
     group_by(bus_line) %>% #perfroms old "create_buses()" function
     nest(cols = !bus_line) %>%
-    mutate(create_pass = map(cols, function(x)  create_pass(x, pass_input_list[[1]]))) %>%
+    mutate(create_pass = map(cols, function(x)  create_pass(x, pass_input_list[["simul_duration"]] ) ) ) %>%
     unnest(cols = "create_pass") %>%
     arrange(pass_arrvl) %>%  
     select(!cols) %>% 
     as.data.frame() 
 }
 
-busCapacityCalculate = function(df_bus, df_pass, xtra_delay_list){
+busCapacityCalculate = function(df_bus, df_pass, xtra_delay_list, berths){
   #need try_catch error and messages
   #need default numbers 
   #what is behavior for bus without a full load - does it wait some amount of time?
   
   # quick initialization
-  i = 0
-  i %+=% 1
+  # i = 0
+  # i %+=% 1
   left_list = list()
   already_left = 0
   current_queue_penalty = 0 #needs to account for exit delay but now only consists of pass_board_total
+  current_open_bay = 1
+  bus_exit_actual = 0
   
   for (i in 1:length(df_bus$bus_line_id) ){
     bus_board_start = (df_bus[i, "bus_arrvl_actl"] + current_queue_penalty) 
@@ -187,23 +174,26 @@ busCapacityCalculate = function(df_bus, df_pass, xtra_delay_list){
     left_list[[i]] = df_pass %>%  
       filter(pass_id %not_in% already_left, 
              pass_arrvl < bus_board_start, 
-             bus_line == df_bus[i, "bus_line"]) %>% 
-      .[1:df_bus[i, "bus_surplus_seats"], ] %>% #this pipe should end hear and and become its own object to include a wait period - maybe %>%  
+             bus_line == df_bus[[i, "bus_line"]]) %>% 
+      .[1:df_bus[i, "bus_surplus_seats"][[1]], ] %>% #this pipe should end hear and and become its own object to include a wait period - maybe %>%  
       # na.omit() %>% #need to filter NA rows - occurs if theres less ppl at stop than bus surplus
       mutate(bus_line_id = paste0(df_bus[i, "bus_line"], "_", df_bus[i, "bus_id"])) %>% 
       merge.data.frame(., df_bus %>% 
-                         select(bus_id, bus_arrvl_actl, bus_surplus_seats, bus_line_id), 
-                       by= "bus_line_id", all.x = T) %>% 
+                         select(bus_id, bus_line_id, bus_arrvl_actl, bus_pass_empty, bus_pass_alight, bus_service_time_alight, bus_surplus_seats,  bus_route_door_cond), 
+                       by = c("bus_line_id"), all.x = T) %>% 
       mutate(bus_line = bus_line_id %>%  
                gsub('(.*)_\\w+', '\\1', .),
+             i = i,
              bus_board_start = bus_board_start,
+             bus_bay_assign = current_open_bay, 
              bus_delay_entry = bus_board_start-df_bus[i, "bus_arrvl_actl"],
-             bus_service_time = sum(pass_board, na.rm = T ), #service time with door operations - might have to make this a function based on different door scenerios
-             bus_service_stop = bus_board_start + bus_service_time, #what is longer alight or board
-             
-             #non-service dwell time 
-             
-             bus_delay_exit = make_bus_delay(xtra_delay_list, bus_delay_entry, bus_service_time),
+             bus_service_time_board = sum(pass_board, na.rm = T ),
+             bus_service_time = case_when(bus_route_door_cond == "Series" ~ bus_service_time_alight+bus_service_time_board, 
+                                          T~max(bus_service_time_alight,bus_service_time_board))) %>% 
+      data.table::data.table() %>% 
+      mutate(bus_service_stop = bus_board_start + bus_service_time) %>% 
+      mutate(bus_delay_exit = case_when(bus_service_stop < bus_exit_actual ~ (bus_exit_actual-bus_service_stop), 
+                                        T~make_bus_delay(xtra_delay_list, bus_delay_entry, bus_service_time)),
              bus_time_inBerth = bus_delay_exit + bus_service_time,
              bus_exit_actual = bus_board_start + bus_time_inBerth,
              bus_delayed_by_queue = case_when(bus_delay_entry == 0~0,
@@ -212,14 +202,26 @@ busCapacityCalculate = function(df_bus, df_pass, xtra_delay_list){
              bus_delay_total = bus_delay_entry + bus_delay_exit,
              bus_no_pick_up = case_when(bus_pass_picked_up == 0~0,
                                         bus_pass_picked_up != 0~1)
-             
       ) 
     
     bus_exit_actual = left_list[[i]]$bus_exit_actual[1]
-    bus_interference_check = bus_exit_actual < df_bus[i+1, "bus_arrvl_actl"]
-    current_queue_penalty = ifelse(bus_interference_check, 
-                                   0, 
-                                   (bus_exit_actual - df_bus[i+1, "bus_arrvl_actl"]))
+    bus_interference_check = (bus_exit_actual < df_bus[i+1, "bus_arrvl_actl"][[1]])
+    bus_interference_check = ifelse(is.na(bus_interference_check), T, bus_interference_check)
+    
+    if (bus_interference_check){
+      #no interference always reset nerth assignment to 1
+      current_open_bay = 1
+      current_queue_penalty = 0
+    } else {
+      if (current_open_bay == berths ) {
+        #if at last berth, assign to first with time penalty
+        current_open_bay = 1
+        current_queue_penalty = (bus_exit_actual - df_bus[i+1, "bus_arrvl_actl"])
+      } else {
+        current_open_bay %+=% 1
+        current_queue_penalty = 0
+      }
+    }
     
     already_left = c(already_left, 
                      left_list[[i]] %>%
@@ -230,12 +232,7 @@ busCapacityCalculate = function(df_bus, df_pass, xtra_delay_list){
   #reduces all list elements to single dataframe with passengers sorted to buses 
   df_left = left_list  %>%  
     reduce(bind_rows) %>% 
-    # arrange(pass_arrvl) %>%  
     mutate(pass_wait = bus_board_start-pass_arrvl)  
-    # group_by(bus_line_id) %>% 
-    # mutate(pass_pick_up = n(), 
-    #        bus_seats_left_empty = bus_surplus_seats-pass_pick_up) %>%  
-    # ungroup()
   
   #returns passengers who are left
   df_remain = df_pass %>%  
@@ -265,7 +262,7 @@ get_summry_statistics = function(data, grouped = F, group){
     tmp_data = data %>%  
       select(bus_line, bus_line_id, starts_with("bus")) %>%
       unique() %>% 
-      group_by(!!as.symbol( group)) 
+      group_by(!!as.symbol(group)) 
   }
   
   tmp_data %>%

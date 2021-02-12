@@ -32,7 +32,7 @@ mod_simulation_inputs_ui <- function(id){
                                     selected = 1), 
                         selectInput("simul_num_berths",
                                     "Berths at stop:", 
-                                    choices = c(1:1),
+                                    choices = c(1:3),
                                     selected = 1)
             ),
             strong("Passeger board/alight times (sec):"),

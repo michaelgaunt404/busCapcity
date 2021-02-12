@@ -16,7 +16,7 @@ app_ui <- function(request) {
       
       #header==============================================================================================================================================================================
       header = dashboardHeaderPlus(
-        title = "Task Order Scoping Tool",
+        title = "Bus Capacity Modeler",
         titleWidth = 300,
         enable_rightsidebar = T,
         rightSidebarIcon = "gears"
@@ -65,10 +65,12 @@ app_ui <- function(request) {
                     ),
                     splitLayout(
                       cellWidths = c("50%", "50%"),
-                      boxPlus_common(title = "Bus Route Input Summary",
+                      boxPlus_common(title = "Bus Route Input Summary"
+                                     ,
                                      DT::dataTableOutput("smmry_bus_routes")
                       ),
-                      boxPlus_common(title = "Bus Route Input Summary",
+                      boxPlus_common(title = "Bus Route Input Summary"
+                                     ,
                                     plotlyOutput("pass_arrvl_dist")
                       )
                     )

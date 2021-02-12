@@ -25,12 +25,15 @@ mod_bus_inputs_server <- function(input, output, session, route_num){
       width = 6,
       style = "background:#F5F5F5",
       
-      splitLayout(cellWidths = c("30%", "30%", "30%"),
+      splitLayout(cellWidths = c("20%", "20%", "30%", "30%"),
                   textInput(inputId = paste0("bus_line_", route_num), label = "Route Name:", 
                             value = paste0("place_holder_", route_num)
-                            # ,
-                            # placeholder = "Unique route name here" #NOTE- want to change this to have palce holder and use the shinyfeedback pkg
                   ),
+                  selectInput(inputId = paste0("bus_route_door_cond_", route_num), 
+                              "Door Condition:", 
+                              choices = c("Series", 
+                                          "Parallel"),
+                              selected = "Series"),
                   sliderInput(inputId  = paste0("bus_route_pass_", route_num) , label = "Pass./hr", min = 50, max = 2000, step = 50, value = 200), 
                   sliderInput(inputId  = paste0("bus_route_pass_sd_", route_num) , label = "Pass Arrvl. std (sec):", min = 0, max = 90, step = 5, value = 15)
       ),
@@ -42,9 +45,11 @@ mod_bus_inputs_server <- function(input, output, session, route_num){
       ),
       # strong("Bus metrics:"),
       # hr(),
-      splitLayout(cellWidths = c("20%", "30%"),
+      splitLayout(cellWidths = c("20%", "25%", "25%", "25%"),
                   selectInput(inputId  = paste0("bus_route_size_", route_num), label = "Select Bus Size", choices = c(30, 60), selected = 60),
-                  sliderInput(inputId  = paste0("bus_route_cap_", route_num), label = "Incoming Capacity (%)", min = 10, max = 90, step = 10, value = 60)
+                  sliderInput(inputId  = paste0("bus_route_cap_", route_num), label = "Spare Capacity (%)", min = 10, max = 90, step = 10, value = 60),
+                  sliderInput(inputId  = paste0("bus_route_num_alight_", route_num), label = "Alight (%)", min = 10, max = 50, step = 10, value = 20),
+                  sliderInput(inputId  = paste0("bus_route_num_alight_sd_", route_num), label = "Alight Std. Deviation (%)", min = 1, max = 10, step = 1, value = 3)
       )
       # , 
       # sliderInput(inputId  = paste0("bus_route_headway_", route_num) , label = "Headway (min)", min = 5, max = 60, step = 5, value = 15)
