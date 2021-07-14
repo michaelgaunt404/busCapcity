@@ -23,11 +23,16 @@ Imports:
     shinyWidgets,
     shinycssloaders,
     shinydashboard,
-    shinydashboardPlus,
     stringr,
     tidyr,
     pkgload,
-    plotly
+    plotly,
+    rlang,
+    shinyBS,
+    shinyFeedback,
+    shinybusy,
+    shinycustomloader,
+    skimr
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1

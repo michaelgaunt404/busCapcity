@@ -9,15 +9,19 @@
 #' @import magrittr
 #' @import RColorBrewer
 #' @import shiny
-#' @import shinydashboard
-#' @import shinydashboardPlus
+#' @import shinyBS
+#' @import shinybusy
 #' @import shinyWidgets
+#' @import shinyFeedback
+#' @import shinydashboard
 #' @import shinycssloaders
+#' @import shinycustomloader
+#' @import skimr
 #' @import DT
+#' @import rlang
 #' @import janitor
 #' @import stringr
 #' @import lubridate
 NULL
-
 
 

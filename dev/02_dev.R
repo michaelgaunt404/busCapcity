@@ -17,16 +17,17 @@
 ## Add one line by package you want to add as dependency
 # list('janitor', 'lubridate', 'magrittr', 'purrr',
 #      'shinyWidgets', 'shinycssloaders', 'shinydashboard',
-#      'shinydashboardPlus', 'stringr', 'tidyr') %>%  
+#      'shinydashboardPlus', 'stringr', 'tidyr', 'rlang', 'shinyBS', 'shinyFeedback', 'shinybusy', 'shinycustomloader', 'skimr') %>%
 #   map(usethis::use_package)
 # usethis::use_package("plotly")
-# 
+
 # usethis::use_package("tidyverse", type = "depends")
 
 ## Add modules ----
 ## Create a module infrastructure in R/
-golem::add_module( name = "bus_inputs" ) # made already
-golem::add_module( name = "simulation_inputs" ) # made already
+# golem::add_module( name = "bus_inputs" ) # made already
+# golem::add_module( name = "bs_modals" ) # made already
+golem::add_module( name = "input_feedback" ) # made already
 
 ## Add helper functions ----
 ## Creates ftc_* and utils_*

@@ -14,9 +14,38 @@ app_server <- function( input, output, session ) {
   
   output$bus <- renderUI({
     lapply(1:simul_num_routes(), function(i){
-      callModule(mod_bus_inputs_server, "bus_inputs_ui_1",
+      callModule(mod_bus_inputs_server, 
+                 "bus_inputs_ui_1",
                  route_num = i)
       })
+  })
+  
+  observeEvent(input$contact, {
+    sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
+                     tags$span(style = 'text-align: left;',
+                               tags$h3('Contact Us', style = 'color: #d73926;'),
+                               tags$h4('The Data Informatics Group', style = 'font-weight: 700;'),
+                               tags$p('Based in Seattle, the Data Informatics Group specializes in creating bespoke data \
+                              products that daylight powerful insights and enable our clients to harness the \
+                              full-potential of their data. Reach out to us!'),
+                               tags$div(id = 'contact_table', render_contact_table()))
+    )
+  })
+  
+  observeEvent(input$dist_board, {
+    sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
+                     tags$span(style = 'text-align: left;',
+                               tags$div(id = 'contact_table', renderPlot(make_density(input$pass_board, input$pass_board_sd, lmt = T))
+                                        ))
+    )
+  })
+  
+  observeEvent(input$dist_alight, {
+    sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
+                     tags$span(style = 'text-align: left;',
+                               tags$div(id = 'contact_table', renderPlot(make_density(input$pass_alight, input$pass_alight_sd, lmt = T))
+                                        ))
+    )
   })
   
   RVlist = reactive({
@@ -24,12 +53,6 @@ app_server <- function( input, output, session ) {
   })
   
   pass_inputs = eventReactive(input$bus_input_go, {
-    # list(
-    #   input$simul_duration,
-    #   input$pass_board,
-    #   input$pass_board_sd
-    # )
-    
     get_list_items(RVlist(), string = "simul_duration|pass_board", purrr = F)
   }) 
   
@@ -53,43 +76,14 @@ app_server <- function( input, output, session ) {
     rv_pass_inputs <<- pass_inputs()
     sim <<- simulation_results()
   })
-  
+
   output$smmry_bus_routes = DT::renderDataTable({
     df_bus() %>%
       select(bus_line, bus_id, bus_route_cap, bus_arrvl_schl, bus_arrvl_actl) %>%
       dt_common(dom = "Bftir",
-                y = 500, pl = 800)
+                y = 290, pl = 800)
   })
   
-  simulation_results = eventReactive(input$bus_simulation_go, {
-    busCapacityCalculate(df_bus(), df_pass(), exit_condition_inputs(), as.numeric(input$simul_num_berths))
-  })
-  
-  output$results_summary_stats = DT::renderDataTable({
-    bind_rows(get_summry_statistics(simulation_results()[[1]][[3]]),
-              get_summry_statistics(simulation_results()[[1]][[3]], grouped = T, group = "bus_line")) %>%
-      mutate(bus_line = case_when(is.na(bus_line) ~ "All Buses",
-                                  T ~ bus_line)) %>%
-      select(bus_line, everything()) %>%
-      dt_common(dom = "Bftir",
-                y = 500, pl = 8000)
-  })
-
-
-  output$results_bus_assign = DT::renderDataTable({
-    simulation_results()[[1]][[3]] %>%
-      select(bus_line, bus_line_id, starts_with("bus")) %>%
-      unique() %>%
-      dt_common(dom = "Bftir",
-                y = 500, pl = 8000)
-  })
-
-  output$results_pass_not_picked_up = DT::renderDataTable({
-    simulation_results()[[1]][[4]] %>%
-      dt_common(dom = "Bftir",
-                y = 500, pl = 8000)
-  })
-
   output$pass_arrvl_dist = renderPlotly({
     chart = df_pass() %>%
       ggplot() +
@@ -97,9 +91,111 @@ app_server <- function( input, output, session ) {
       labs(x = "Passenger Arrival (sec)", title = "Distribution of Passenger Arrivals") +
       scale_color_viridis_d() +
       theme_classic()
-
+    
     plotly::ggplotly(chart)
+    
+  })
+  
+  simulation_results = eventReactive(input$bus_simulation_go, {
+    tmp_raw = list(
+      map(1:as.numeric(input$simul_num), function(m) get_bus_inputs(RVlist(), input$simul_num_routes, pass_inputs())),
+      map(1:as.numeric(input$simul_num), function(m) get_pass_inputs(RVlist(), input$simul_num_routes, pass_inputs()))  
+    ) %>%  
+      pmap(function(x, y, z)
+        busCapacityCalculate(x, y, rv_exit, 1)
+      )
+    
+    map(1:4, function(x) get_summary_df(tmp_raw, as.numeric(input$simul_num), x))
+    
+  })
+ 
+  output$results_summary_stats = DT::renderDataTable({
+    bind_rows(get_summry_statistics(simulation_results()[[3]]),
+              get_summry_statistics(simulation_results()[[3]], grouped = T, group = "bus_line")) %>%
+      mutate(bus_line = case_when(is.na(bus_line) ~ "All Buses",
+                                  T ~ bus_line)) %>%
+      select(bus_line, everything()) %>%
+      dt_common(dom = "Bftir",
+                y = 600, pl = 8000)
+  })
 
+  ## To be copied in the server
+  callModule(mod_output_dt_server, "summary_tab", .data = simulation_results)
+
+
+  observe({
+    require(input$simul_num_routes)
+    
+    # Sys.sleep(2)
+    
+    #bus route capacity
+    list(1:as.numeric(input$simul_num_routes), "bus_route_cap_", "Must be 0 <> 100", ">100") %>%
+      pmap(function(x, y, z, m)
+        observeEvent(input[[paste0(y, x)]], {
+          if (input[[paste0(y, x)]] > 100) {
+            showFeedbackWarning(
+              inputId =  paste0(y, x),
+              text = z
+            )
+          } else {
+            hideFeedback(paste0(y, x))
+          }
+        }
+        )
+      )
+    
+    #bus route passengers
+    list(1:as.numeric(input$simul_num_routes), "bus_route_pass_", "Change 0 to 1", "==0") %>%
+      pmap(function(x, y, z, m)
+        observeEvent(input[[paste0(y, x)]], {
+          if (input[[paste0(y, x)]] < 1) {
+            showFeedbackWarning(
+              inputId =  paste0(y, x),
+              text = z
+            )
+          } else {
+            hideFeedback(paste0(y, x))
+          }
+        }
+        )
+      )
+    
+    # #modals for headway density
+    # list(1:as.numeric(input$simul_num_routes), "dist_headway_", "bus_route_headway_", "bus_route_headway_sd_") %>%
+    #   pmap(function(x, y, z, m)
+    #     observeEvent(input[[paste0(y, x)]], {
+    #       sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
+    #                        tags$span(style = 'text-align: left;',
+    #                                  tags$div(id = 'contact_table', renderPlot(make_density(input[[paste0(z, x)]], input[[paste0(m, x)]]))
+    #                                  ))
+    #       )}
+    #     )
+    #   )
+    # 
+    # #modals for headway density
+    # list(1:as.numeric(input$simul_num_routes), "dist_route_num_alight_", "bus_route_num_alight_", "bus_route_num_alight_sd_") %>%
+    #   pmap(function(x, y, z, m)
+    #     observeEvent(input[[paste0(y, x)]], {
+    #       sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
+    #                        tags$span(style = 'text-align: left;',
+    #                                  tags$div(id = 'contact_table', renderPlot(make_density(input[[paste0(z, x)]], input[[paste0(m, x)]]))
+    #                                  ))
+    #       )}
+    #     )
+    #   )
+    # 
+    # #modals for headway density
+    # list(1:as.numeric(input$simul_num_routes), "dist_route_pass_", "bus_route_pass_", "bus_route_pass_sd_") %>%
+    #   pmap(function(x, y, z, m)
+    #     observeEvent(input[[paste0(y, x)]], {
+    #       sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
+    #                        tags$span(style = 'text-align: left;',
+    #                                  tags$div(id = 'contact_table', renderPlot(make_density(input[[paste0(z, x)]], input[[paste0(m, x)]]))
+    #                                  ))
+    #       )}
+    #     )
+    #   )
+    
   })
   
 }

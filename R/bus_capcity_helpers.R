@@ -64,6 +64,19 @@ quick_dist = function(num, sd, floor = F){
   }
 }
 
+make_density = function(mean, sd, lmt = F){
+  if (lmt){
+  (mean+abs(rnorm(n = 1e6, mean = 0, sd = sd))) %>% 
+    density() %>% 
+    plot(main = str_glue("Mean: {mean} & Standard Deviation: {sd}"))
+  } else {
+    (mean+(rnorm(n = 1e6, mean = 0, sd = sd))) %>% 
+      density() %>% 
+      plot(main = str_glue("Mean: {mean} & Standard Deviation: {sd}"))
+  }
+}
+
+
 #df creation====================================================================
 #create dataframe for a singular bus route
 
@@ -122,13 +135,12 @@ create_pass = function(pass, simul_time){
   
   data.frame(pass_id = seq(1: tmp_num_pass),
              pass_arrvl = pass$pass_headway,
-             pass_board = dgt2(pass$pass_board + quick_dist(tmp_num_pass, pass$pass_board_sd))
+             pass_board = dgt2(pass$pass_board + abs(quick_dist(tmp_num_pass, pass$pass_board_sd)))
   ) %>%
     mutate(pass_arrvl = cumsum(pass_arrvl) + quick_dist(tmp_num_pass, pass$bus_route_pass_sd, T),
            pass_arrvl = case_when(pass_arrvl <= 0~0,
                                   pass_arrvl > 0~pass_arrvl)) %>%
     arrange(pass_arrvl)
-
 }
 
 get_pass_inputs =  function(rvList, num_of_buses, pass_input_list){
@@ -151,6 +163,7 @@ get_pass_inputs =  function(rvList, num_of_buses, pass_input_list){
     unnest(cols = "create_pass") %>%
     arrange(pass_arrvl) %>%  
     select(!cols) %>% 
+    mutate(pass_id_line = str_glue("{bus_line}_{pass_id}")) %>% 
     as.data.frame() 
 }
 
@@ -160,8 +173,8 @@ busCapacityCalculate = function(df_bus, df_pass, xtra_delay_list, berths){
   #what is behavior for bus without a full load - does it wait some amount of time?
   
   # quick initialization
-  # i = 0
-  # i %+=% 1
+  i = 0
+  i %+=% 1
   left_list = list()
   already_left = 0
   current_queue_penalty = 0 #needs to account for exit delay but now only consists of pass_board_total
@@ -172,9 +185,9 @@ busCapacityCalculate = function(df_bus, df_pass, xtra_delay_list, berths){
     bus_board_start = (df_bus[i, "bus_arrvl_actl"] + current_queue_penalty) 
     
     left_list[[i]] = df_pass %>%  
-      filter(pass_id %not_in% already_left, 
-             pass_arrvl < bus_board_start, 
-             bus_line == df_bus[[i, "bus_line"]]) %>% 
+      filter(pass_id_line %not_in% already_left) %>% 
+      filter(pass_arrvl < bus_board_start[[1]]) %>% 
+      filter(bus_line == df_bus[[i, "bus_line"]]) %>% 
       .[1:df_bus[i, "bus_surplus_seats"][[1]], ] %>% #this pipe should end hear and and become its own object to include a wait period - maybe %>%  
       # na.omit() %>% #need to filter NA rows - occurs if theres less ppl at stop than bus surplus
       mutate(bus_line_id = paste0(df_bus[i, "bus_line"], "_", df_bus[i, "bus_id"])) %>% 
@@ -226,7 +239,7 @@ busCapacityCalculate = function(df_bus, df_pass, xtra_delay_list, berths){
     already_left = c(already_left, 
                      left_list[[i]] %>%
                        na.omit() %>% 
-                       .[["pass_id"]])
+                       .[["pass_id_line"]])
   }
   
   #reduces all list elements to single dataframe with passengers sorted to buses 
@@ -238,7 +251,17 @@ busCapacityCalculate = function(df_bus, df_pass, xtra_delay_list, berths){
   df_remain = df_pass %>%  
     filter(pass_id %not_in% df_left$pass_id)
   
-  return(list(list(df_bus, df_pass, df_left, df_remain)))
+  return((list(df_bus, df_pass, df_left, df_remain)))
+}
+
+#get metrics from simulation object=============================================
+get_summary_df = function(simulation_results_object, length, df){
+  list(simulation_results_object, 1:as.numeric(length), df) %>%
+    pmap(function(x, y, z)
+      x[[z]] %>%
+        mutate(simulation_num = y)
+    ) %>%
+    reduce(bind_rows)
 }
 
 #get metrics from simulation object=============================================
@@ -275,3 +298,4 @@ get_summry_statistics = function(data, grouped = F, group){
   
 }
 
+  

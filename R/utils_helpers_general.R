@@ -12,6 +12,12 @@
 #plusEqual operator
 `%+=%` = function(e1,e2) eval.parent(substitute(e1 <- e1 + e2))
 
+#evaluate string functions
+#eg works if var is "input$something > num" in shiny
+strg_fun_eval = function(text){
+  eval(rlang::parse_expr(text))  
+}
+
 #takes quick counts for columns and their items
 quick_value_count = function(df, rows, column, filter = NA){
   if(is.na(filter)){
@@ -55,15 +61,24 @@ lmt0 = function(x){
 }
 
 
-
 #shiny specific==================================================================
-
 list = list(closable = F, 
             collapsed = F, 
             collapsible = T, 
             width = "100%", 
             solidHeader = T, 
             status = "primary")
+
+quick_bs = function(id, title, text, trigger = "hover"){
+  tagList(
+    bsButton(inputId = id, label = "Info", icon = icon("question"), style = "info", size = "small"),
+    bsPopover(id = id, title = title,
+              content = text,
+              placement = "right", 
+              trigger = trigger)
+  )
+}
+
 
 #takes master shiny input list and extracts list elements by name match 
 #string can take "|" operator 
@@ -77,16 +92,17 @@ get_list_items = function(input_list, suffix = NA, string, purrr = T){
 
 #makes common box that works for most purposes 
 #objects need to be in a list
-boxPlus_common = function(title = NA, object_in_box = NA){
-  boxPlus(title = title, 
-          closable = F, 
-          collapsed = F, 
+box_common = function(title = NA, object_in_box = NA, collapsed = F){
+  box(title = title, 
+          # closable = F, 
+          collapsed = collapsed, 
           collapsible = T, 
           width = "100%", 
           solidHeader = T, 
           status = "primary", 
           object_in_box)
 }
+
 
 #creates an empty row of a given height
 #for shiny usage

@@ -8,18 +8,23 @@ app_ui <- function(request) {
   tagList(
     # Leave this function for adding external resources
     golem_add_external_resources(),
+    useShinyFeedback(), #needed for input feedback
     
     #===========================================================================
     # List the first level UI elements here
-    dashboardPagePlus(
+    dashboardPage(
       # introjsUI(), #enables js intro turorial
       
+      shinybusy::add_busy_bar(color = "#FF0000"),
       #header==============================================================================================================================================================================
-      header = dashboardHeaderPlus(
+      header = dashboardHeader(
         title = "Bus Capacity Modeler",
         titleWidth = 300,
-        enable_rightsidebar = T,
-        rightSidebarIcon = "gears"
+        tags$li(class = 'dropdown',
+                actionLink('contact', label = '', icon = icon('envelope-o', class = 'fa-lg'))),
+        tags$li(class = 'dropdown',
+                tags$a(href = "https://www.wsp.com/en-GL", target = "_blank",
+                       tags$img(height = "20px", alt = "WSP USA ©", src = "./inst/app/www/wsp_logo.png")))
       ),
       #footer==============================================================================================================================================================================
       # footer = dashboardFooter(
@@ -29,18 +34,15 @@ app_ui <- function(request) {
       #sidebar==============================================================================================================================================================================
       sidebar = dashboardSidebar(width  = 200,
                                  sidebarMenu(id = "tabs",
-                                             menuItem("Dashboard", 
+                                             menuItem("Step 1: Simulation Parameters", 
                                                       tabName = "db", 
                                                       icon = icon("toolbox"),
                                                       startExpanded = T,
-                                                      selected = T),
+                                                      selected = T
+                                             ),
                                              menuItem("Simulation Results", 
                                                       tabName = "simul_result", 
                                                       icon = icon("stream"),
-                                                      startExpanded = F),
-                                             menuItem("Passengers Left Behind", 
-                                                      tabName = "ph_2", 
-                                                      icon = icon("table"),
                                                       startExpanded = F)
                                  )
       ),
@@ -49,76 +51,80 @@ app_ui <- function(request) {
         tabItems(
           #scope_db tab=========================================================
           tabItem("db",
-                  col_4(
-                    mod_simulation_inputs_ui("global_inputs"),
-                    boxPlus_common(title = "Bus Route Inputs", 
-                                   list(
-                                     actionButton("bus_input_go", "Confirm Bus Input"),
-                                     actionButton("bus_simulation_go", "Run Simulation")
-                                   )
-                    )
+                  col_3(
+                    mod_simulation_inputs_ui("global_inputs")
                   ),
-                  col_8(
-                    boxPlus_common(
+                  col_9(
+                    box_common(
                       title = "Bus Route Inputs",
                       uiOutput("bus")
                     ),
                     splitLayout(
                       cellWidths = c("50%", "50%"),
-                      boxPlus_common(title = "Bus Route Input Summary"
-                                     ,
-                                     DT::dataTableOutput("smmry_bus_routes")
-                      ),
-                      boxPlus_common(title = "Bus Route Input Summary"
-                                     ,
-                                    plotlyOutput("pass_arrvl_dist")
-                      )
+                      box_common(title = "Bus Route Input Summary",
+                                     collapsed = T,
+                                     list(
+                                       "This table details simulated buses given user provided inputs.",
+                                       br(),
+                                       "It is repersentative of each simulation if more than one simulation is ran.",
+                                       br(),
+                                       DT::dataTableOutput("smmry_bus_routes") %>%  withSpinner()
+                                     )
+                      ), 
+                      box_common(title = "Passengers Input Summary",
+                                     collapsed = T,
+                                     list(
+                                       "This table details simulated passengers given user provided inputs.",
+                                       br(),
+                                       "It is repersentative of each simulation if more than one simulation is ran.",
+                                       br(),
+                                     plotlyOutput("pass_arrvl_dist") %>%  withSpinner()
+                                     )
+                      ) 
                     )
-                  )
+                  ) 
           ), 
           #timeline tab=========================================================
           tabItem("simul_result",
                   col_4(
-                    DT::dataTableOutput("results_summary_stats")%>%  withSpinner()
+                    box_common(
+                      title = "Aggregated Simulation Metrics", 
+                      DT::dataTableOutput("results_summary_stats") %>%  withSpinner()
+                    )
                   ),
                   col_8(
-                    DT::dataTableOutput("results_bus_assign") %>%  withSpinner()
+                    mod_output_dt_ui("summary_tab") 
                   )        
-          ), 
-          #data_center tab======================================================
-          tabItem("ph_2",
-                  col_4(
-                    DT::dataTableOutput("results_pass_not_picked_up") %>%  withSpinner()
-                  )     
           )
         )
-      ),
-      rightsidebar = rightSidebar(
-        background = "dark",
-        rightSidebarTabContent(
-          id = 1,
-          title = "Tab 1",
-          icon = "desktop",
-          active = TRUE,
-          sliderInput(
-            "obs",
-            "Number of observations:",
-            min = 0, max = 1000, value = 500
-          )
-        ),
-        rightSidebarTabContent(
-          id = 2,
-          title = "Tab 2",
-          textInput("caption", "Caption", "Data Summary")
-        ),
-        rightSidebarTabContent(
-          id = 3,
-          icon = "paint-brush",
-          title = "Tab 3",
-          numericInput("obs", "Observations:", 10, min = 1, max = 100)
-        )
-      ),
-      title = "Right Sidebar"
+      )
+      # ,
+      # rightsidebar = rightSidebar(
+      #   background = "dark",
+      #   rightSidebarTabContent(
+      #     id = 1,
+      #     title = "Tab 1",
+      #     icon = "desktop",
+      #     active = TRUE,
+      #     sliderInput(
+      #       "obs",
+      #       "Number of observations:",
+      #       min = 0, max = 1000, value = 500
+      #     )
+      #   ),
+      #   rightSidebarTabContent(
+      #     id = 2,
+      #     title = "Tab 2",
+      #     textInput("caption", "Caption", "Data Summary")
+      #   ),
+      #   rightSidebarTabContent(
+      #     id = 3,
+      #     icon = "paint-brush",
+      #     title = "Tab 3",
+      #     numericInput("obs", "Observations:", 10, min = 1, max = 100)
+      #   )
+      # ),
+      # title = "Right Sidebar"
     )
     #===========================================================================
   )
