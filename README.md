@@ -1,7 +1,11 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
+<img src="./inst/app/www/bus_WonB.svg" align="right" width="250">
+
 # busCapacity
+
+> A web application to simulate bus operations at berth locations
 
 <!-- badges: start -->
 
@@ -9,44 +13,19 @@
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 <!-- badges: end -->
 
-The goal of busCapacity is to …
+This repo contains functions to simulate the operation of bus berth
+stations and to provide the user with summary statistics given their
+inputs.
 
-## Installation
+The main data product resulting from this work is an online dashboard
+that transpiration practitioners can access this tool with.
 
-You can install the released version of busCapacity from
-[CRAN](https://CRAN.R-project.org) with:
+With the dashboard, transportation practitioners can:
 
-``` r
-install.packages("busCapacity")
-```
+-   Simulate a number of bus routes
+-   Provide simulation parameters regarding passenger and bus behaviour
+-   Define bus berth and exit constraints
+-   Retrieve summary statistics
+-   Retrieve simulated data
 
-And the development version from [GitHub](https://github.com/) with:
-
-``` r
-# install.packages("devtools")
-devtools::install_github("michaelgaunt404/repository")
-```
-
-## Example
-
-This is a basic example which shows you how to solve a common problem:
-
-``` r
-# library(busCapacity)
-## basic example code
-```
-
-What is special about using `README.Rmd` instead of just `README.md`?
-You can include R chunks like so:
-
-``` r
-# summary(cars)
-```
-
-You’ll still need to render `README.Rmd` regularly, to keep `README.md`
-up-to-date.
-
-You can also embed plots, for example:
-
-In that case, don’t forget to commit and push the resulting figure
-files, so they display on GitHub\!
+And all without having to know how to code, cool!
