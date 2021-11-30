@@ -12,6 +12,7 @@ app_server <- function( input, output, session ) {
       as.numeric()
     })
   
+  #makes reacrtive number of bus inputs=========================================
   output$bus <- renderUI({
     lapply(1:simul_num_routes(), function(i){
       callModule(mod_bus_inputs_server, 
@@ -20,6 +21,8 @@ app_server <- function( input, output, session ) {
       })
   })
   
+  #SECTION: popup messages/modals===============================================
+  #=============================================================================
   observeEvent(input$contact, {
     sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
                      tags$span(style = 'text-align: left;',
@@ -48,6 +51,21 @@ app_server <- function( input, output, session ) {
     )
   })
   
+  observeEvent(input$view_var, {
+  print(RVlist())
+  #   sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
+  #                    tags$span(style = 'text-align: left;',
+  #                              tags$div(id = 'contact_table', 
+  #                                       DT::renderDataTable({
+  #                                         RVlist() %>%
+  #                                           dt_common(dom = "Bftir",
+  #                                                     y = 600, pl = 8000)
+  #                                       })  
+  #                              ))
+  #   )
+  })
+  
+
   RVlist = reactive({
     reactiveValuesToList(input)
   })
@@ -67,6 +85,7 @@ app_server <- function( input, output, session ) {
   df_pass = eventReactive(input$bus_input_go, {
     get_pass_inputs(RVlist(), input$simul_num_routes, pass_inputs())
   })
+  
   
   observe({
     rv_df_bus <<- df_bus()
@@ -160,17 +179,17 @@ app_server <- function( input, output, session ) {
         )
       )
     
-    # #modals for headway density
-    # list(1:as.numeric(input$simul_num_routes), "dist_headway_", "bus_route_headway_", "bus_route_headway_sd_") %>%
-    #   pmap(function(x, y, z, m)
-    #     observeEvent(input[[paste0(y, x)]], {
-    #       sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
-    #                        tags$span(style = 'text-align: left;',
-    #                                  tags$div(id = 'contact_table', renderPlot(make_density(input[[paste0(z, x)]], input[[paste0(m, x)]]))
-    #                                  ))
-    #       )}
-    #     )
-    #   )
+    #modals for headway density
+    list(1:as.numeric(input$simul_num_routes), "dist_headway_", "bus_route_headway_", "bus_route_headway_sd_") %>%
+      pmap(function(x, y, z, m)
+        observeEvent(input[[paste0(y, x)]], {
+          sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
+                           tags$span(style = 'text-align: left;',
+                                     tags$div(id = 'contact_table', renderPlot(make_density(input[[paste0(z, x)]], input[[paste0(m, x)]]))
+                                     ))
+          )}
+        )
+      )
     # 
     # #modals for headway density
     # list(1:as.numeric(input$simul_num_routes), "dist_route_num_alight_", "bus_route_num_alight_", "bus_route_num_alight_sd_") %>%
