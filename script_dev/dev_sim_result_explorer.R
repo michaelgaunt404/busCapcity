@@ -35,6 +35,13 @@ source(here::here("script_dev/helpers_plotly.r"))
 source(here::here("script_dev/helpers_DT.r"))
 source(here::here("R/bus_capcity_helpers.r"))
 
+input = list(cols_to_pivot = cols_to_pivot, 
+             hist_transfrom = "identity", 
+             hist_binwidth = 10, 
+             arrival_plot_color = "Bus Line*bus_line",
+             arrival_plot_color = "Bus Experiences \nEntry Delay*bus_delay_entry>1"
+)   
+
 #source data====================================================================
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #content in this section should be removed if in production - ok for dev
@@ -63,11 +70,11 @@ bind_rows(get_summry_statistics(sim[[3]]),
             y = 600, pl = 8000)
 
 #simulation visualizations======================================================
-#two ways to do it - summaries each variabvle and bus over all simulations or 
-#---- disuplay wach simulation individually 
-#i think the latter is overkill but it is inluded as option #2
+#two ways to do it - summaries each variable and bus over all simulations or 
+#---- display was simulation individually 
+#i think the latter is overkill but it is included as option #2
 
-#OPTION #1_folding simulaiton results in with each other
+#OPTION #1_folding simulation results in with each other
 #make data
 bolo = data %>%
   select(bus_line, bus_line_id, starts_with("bus")) %>%
@@ -123,12 +130,11 @@ bolo_density %>%
 
 
 
-#$$$$$$$$$$$$$$$$$$$
+#OPTION #2 
 bolo = data %>%
   select(bus_line, bus_line_id, simulation_num, starts_with("bus")) %>%
   select(!bus_route_door_cond ) %>% 
   unique() %>%
-  
   pivot_longer(cols = !c(bus_line:bus_id)) %>%  
   select(!c(bus_line_id, bus_id))  
 

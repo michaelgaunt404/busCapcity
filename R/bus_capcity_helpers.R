@@ -76,6 +76,10 @@ make_density = function(mean, sd, lmt = F){
   }
 }
 
+make_histogram = function(mean, sd, lmt = F){
+  (mean+abs(rnorm(n = 1e6, mean = 0, sd = sd))) %>% 
+    hist(main = str_glue("Mean: {mean} & Standard Deviation: {sd}"))
+}
 
 #df creation====================================================================
 #create dataframe for a singular bus route
@@ -96,6 +100,10 @@ create_bus = function(bus) {
            bus_arrvl_actl = bus_arrvl_schl+quick_dist(bus$bus_num, bus$bus_route_headway_sd)*60
            )
 }
+
+# rvList = rv_RVlist
+# num_of_buses = rv_RVlist$simul_num_routes
+# input_list = rv_pass_inputs
 
 get_bus_inputs =  function(rvList, num_of_buses, input_list){
   #perfroms a few steps 

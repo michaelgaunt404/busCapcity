@@ -38,7 +38,7 @@ app_server <- function( input, output, session ) {
   observeEvent(input$dist_board, {
     sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
                      tags$span(style = 'text-align: left;',
-                               tags$div(id = 'contact_table', renderPlot(make_density(input$pass_board, input$pass_board_sd, lmt = T))
+                               tags$div(id = 'contact_table',renderPlot(make_histogram(input$pass_board, input$pass_board_sd, lmt = T))
                                         ))
     )
   })
@@ -46,7 +46,7 @@ app_server <- function( input, output, session ) {
   observeEvent(input$dist_alight, {
     sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
                      tags$span(style = 'text-align: left;',
-                               tags$div(id = 'contact_table', renderPlot(make_density(input$pass_alight, input$pass_alight_sd, lmt = T))
+                               tags$div(id = 'contact_table', renderPlot(make_histogram(input$pass_alight, input$pass_alight_sd, lmt = T))
                                         ))
     )
   })
@@ -71,21 +71,27 @@ app_server <- function( input, output, session ) {
   })
   
   pass_inputs = eventReactive(input$bus_input_go, {
+    print("pass_inputs")
     get_list_items(RVlist(), string = "simul_duration|pass_board", purrr = F)
   }) 
   
   exit_condition_inputs = eventReactive(input$bus_input_go, {
+    print("exit_condition_inputs")
     get_list_items(RVlist(), string = "exit_cond_", purrr = F)
   }) 
   
   df_bus = eventReactive(input$bus_input_go, {
-    get_bus_inputs(RVlist(), input$simul_num_routes, pass_inputs())
+    require(pass_inputs())
+    print("df_bus")
+    # get_bus_inputs(RVlist(), input$simul_num_routes, pass_inputs())
+    get_bus_inputs(rv_RVlist, rv_RVlist$simul_num_routes, rv_pass_inputs)
+    print("df_bus_end")
   })
   
   df_pass = eventReactive(input$bus_input_go, {
+    print("df_pass")
     get_pass_inputs(RVlist(), input$simul_num_routes, pass_inputs())
   })
-  
   
   observe({
     rv_df_bus <<- df_bus()
@@ -179,6 +185,27 @@ app_server <- function( input, output, session ) {
         )
       )
     
+    #plot modals for bus inputs=================================================
+    #===========================================================================
+    #modals for capacity count
+    list(1:as.numeric(input$simul_num_routes), "bus_size_", "bus_route_size_", "bus_route_cap_") %>%
+      pmap(function(x, y, z, m)
+        observeEvent(input[[paste0(y, x)]], {
+          sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
+                           tags$span(style = 'text-align: left;',
+                                     tags$div(id = 'contact_table', DT::renderDT(
+                                       data.frame(Variable = c("Bus Maximum Capcity", "No. of Empty Seats", "No. Passengers Onboard"), 
+                                                  Count = c(input[[paste0(z, x)]], 
+                                                            input[[paste0(z, x)]]*(input[[paste0(m, x)]])/100, 
+                                                            input[[paste0(z, x)]]-input[[paste0(z, x)]]*(input[[paste0(m, x)]])/100)) %>%  
+                                         dt_common(dom = "t")
+                                       
+                                       )
+                                     ))
+          )}
+        )
+      )
+    
     #modals for headway density
     list(1:as.numeric(input$simul_num_routes), "dist_headway_", "bus_route_headway_", "bus_route_headway_sd_") %>%
       pmap(function(x, y, z, m)
@@ -190,31 +217,31 @@ app_server <- function( input, output, session ) {
           )}
         )
       )
-    # 
-    # #modals for headway density
-    # list(1:as.numeric(input$simul_num_routes), "dist_route_num_alight_", "bus_route_num_alight_", "bus_route_num_alight_sd_") %>%
-    #   pmap(function(x, y, z, m)
-    #     observeEvent(input[[paste0(y, x)]], {
-    #       sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
-    #                        tags$span(style = 'text-align: left;',
-    #                                  tags$div(id = 'contact_table', renderPlot(make_density(input[[paste0(z, x)]], input[[paste0(m, x)]]))
-    #                                  ))
-    #       )}
-    #     )
-    #   )
-    # 
-    # #modals for headway density
-    # list(1:as.numeric(input$simul_num_routes), "dist_route_pass_", "bus_route_pass_", "bus_route_pass_sd_") %>%
-    #   pmap(function(x, y, z, m)
-    #     observeEvent(input[[paste0(y, x)]], {
-    #       sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
-    #                        tags$span(style = 'text-align: left;',
-    #                                  tags$div(id = 'contact_table', renderPlot(make_density(input[[paste0(z, x)]], input[[paste0(m, x)]]))
-    #                                  ))
-    #       )}
-    #     )
-    #   )
-    
+
+    #modals for alight density
+    list(1:as.numeric(input$simul_num_routes), "dist_route_num_alight_", "bus_route_num_alight_", "bus_route_num_alight_sd_") %>%
+      pmap(function(x, y, z, m)
+        observeEvent(input[[paste0(y, x)]], {
+          sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
+                           tags$span(style = 'text-align: left;',
+                                     tags$div(id = 'contact_table', renderPlot(make_density(input[[paste0(z, x)]], input[[paste0(m, x)]]))
+                                     ))
+          )}
+        )
+      )
+
+    #modals for passenger density
+    list(1:as.numeric(input$simul_num_routes), "dist_route_pass_", "bus_route_pass_", "bus_route_pass_sd_") %>%
+      pmap(function(x, y, z, m)
+        observeEvent(input[[paste0(y, x)]], {
+          sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
+                           tags$span(style = 'text-align: left;',
+                                     tags$div(id = 'contact_table', renderPlot(make_density(input[[paste0(z, x)]], input[[paste0(m, x)]]))
+                                     ))
+          )}
+        )
+      )
+
   })
   
 }
