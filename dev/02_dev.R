@@ -25,9 +25,10 @@
 
 ## Add modules ----
 ## Create a module infrastructure in R/
+golem::add_module(name = "sim_inputs_noBox") # made already
 # golem::add_module( name = "bus_inputs" ) # made already
 # golem::add_module( name = "bs_modals" ) # made already
-golem::add_module( name = "input_feedback" ) # made already
+golem::add_module(name = "input_feedback" ) # made already
 
 ## Add helper functions ----
 ## Creates ftc_* and utils_*
@@ -42,7 +43,7 @@ golem::add_css_file( "custom" )
 
 ## Add internal datasets ----
 ## If you have data in your package
-usethis::use_data_raw( name = "my_dataset", open = FALSE ) 
+usethis::use_data_raw(name = "my_dataset", open = FALSE ) 
 
 ## Tests ----
 ## Add one line by test you want to create

@@ -76,6 +76,10 @@ make_density = function(mean, sd, lmt = F){
   }
 }
 
+make_histogram = function(mean, sd, lmt = F){
+  (mean+abs(rnorm(n = 1e6, mean = 0, sd = sd))) %>% 
+    hist(main = str_glue("Mean: {mean} & Standard Deviation: {sd}"))
+}
 
 #df creation====================================================================
 #create dataframe for a singular bus route
@@ -105,12 +109,28 @@ get_bus_inputs =  function(rvList, num_of_buses, input_list){
   #->"group_by()" and down makes buses using purrr functionality
   list(1:num_of_buses) %>%  
     pmap(function(x) 
-      get_list_items(rvList, string = "bus_", suffix = x)
+      get_list_items(rvList, string = "bus_", suffix = x) %>%  
+        data.frame() 
     ) %>% 
     map(
-      ~{names(.)<- names(.) %>%  str_sub(end = -3);.}
+      ~{names(.) <- names(.) %>%
+        str_sub(end = -3);.}
     ) %>% 
-    map_dfr(bind_rows) %>%  
+    map(~.x %>% 
+          select('bus_route_cap',
+                 'bus_route_headway_sd',
+                 'bus_route_headway',
+                 'bus_route_pass_sd',
+                 'bus_route_door_cond',
+                 'bus_route_num_alight_sd',
+                 'bus_route_pass',
+                 'bus_size',
+                 'bus_route_num_alight',
+                 'bus_line',
+                 'bus_route_size'
+          ) %>%  mutate_if(is.integer, as.numeric)
+    ) %>% 
+    reduce(bind_rows) %>% 
     mutate(bus_num = floor(input_list[["simul_duration"]]/bus_route_headway),
            bus_pass_empty_num = floor(as.numeric(bus_route_size)*(bus_route_cap/100)),
            bus_pass_empty_sd = 0, #zero variance in empty
@@ -143,15 +163,25 @@ create_pass = function(pass, simul_time){
     arrange(pass_arrvl)
 }
 
+# rvList = rv_RVlist
+# num_of_buses = rv_RVlist$simul_num_routes
+# input_list = rv_pass_inputs
+
 get_pass_inputs =  function(rvList, num_of_buses, pass_input_list){
   list(1:num_of_buses) %>%
     pmap(function(x)
-      get_list_items(rvList, string = "pass_|bus_line_", suffix = x)
+      get_list_items(rvList, string = "pass_|bus_line_", suffix = x) %>%  
+        data.frame() 
     ) %>%
     map(
-      ~{names(.)<- names(.) %>%  str_sub(end = -3);.} #removes suffixs from input names
-    ) %>%
-    map_dfr(bind_rows) %>% #combines to single df
+      ~{names(.) <- names(.) %>%
+        str_sub(end = -3);.}
+    ) %>% 
+    map(~.x %>% 
+          select("bus_route_pass_sd", "dist_route_pass", "bus_route_pass", "bus_line") %>%  
+          mutate_if(is.integer, as.numeric)
+    ) %>%  
+    reduce(bind_rows) %>% 
     mutate(
       pass_headway = 1/(bus_route_pass/3600),
       pass_board = pass_input_list[["pass_board"]],

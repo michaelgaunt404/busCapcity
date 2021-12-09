@@ -34,16 +34,26 @@ app_ui <- function(request) {
       #sidebar==============================================================================================================================================================================
       sidebar = dashboardSidebar(width  = 200,
                                  sidebarMenu(id = "tabs",
-                                             menuItem("Step 1: Simulation Parameters", 
+                                             menuItem("Step 1:  Simulation Inputs", 
                                                       tabName = "db", 
                                                       icon = icon("toolbox"),
                                                       startExpanded = T,
                                                       selected = T
-                                             ),
-                                             menuItem("Simulation Results", 
+                                                      # ,mod_sim_inputs_noBox_ui("global_inputs")
+                                                      
+                                             )
+                                             ,menuItem("Simulation Results", 
                                                       tabName = "simul_result", 
                                                       icon = icon("stream"),
-                                                      startExpanded = F)
+                                                      startExpanded = F
+                                                      # , 
+                                                      # downloadLink('downloadData', 'Download')
+                                                      )
+                                             ,menuItem("Debug and Dev", 
+                                                       tabName = "debug_dev", 
+                                                       icon = icon("bug"),
+                                                       startExpanded = F,
+                                                       mod_get_variables_ui("get_variables_ui_1"))
                                  )
       ),
       #body==============================================================================================================================================================================
@@ -53,6 +63,7 @@ app_ui <- function(request) {
           tabItem("db",
                   col_3(
                     mod_simulation_inputs_ui("global_inputs")
+                  #   # mod_sim_inputs_noBox_ui("sim_inputs_noBox_ui_1")
                   ),
                   col_9(
                     box_common(
