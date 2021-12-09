@@ -45,7 +45,10 @@ app_ui <- function(request) {
                                              ,menuItem("Simulation Results", 
                                                       tabName = "simul_result", 
                                                       icon = icon("stream"),
-                                                      startExpanded = F)
+                                                      startExpanded = F
+                                                      # , 
+                                                      # downloadLink('downloadData', 'Download')
+                                                      )
                                              ,menuItem("Debug and Dev", 
                                                        tabName = "debug_dev", 
                                                        icon = icon("bug"),

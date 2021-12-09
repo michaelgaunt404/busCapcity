@@ -83,8 +83,8 @@ app_server <- function( input, output, session ) {
   df_bus = eventReactive(input$bus_input_go, {
     require(pass_inputs())
     print("df_bus")
-    # get_bus_inputs(RVlist(), input$simul_num_routes, pass_inputs())
-    get_bus_inputs(rv_RVlist, rv_RVlist$simul_num_routes, rv_pass_inputs)
+    get_bus_inputs(RVlist(), input$simul_num_routes, pass_inputs())
+    # get_bus_inputs(rv_RVlist, rv_RVlist$simul_num_routes, rv_pass_inputs)
     print("df_bus_end")
   })
   
@@ -121,6 +121,15 @@ app_server <- function( input, output, session ) {
     
   })
   
+  # output$downloadData <- downloadHandler(
+  #   filename = function() {
+  #     paste('data-', Sys.Date(), '.csv', sep='')
+  #   },
+  #   content = function(con) {
+  #     write.csv(data, con)
+  #   }
+  # )
+  
   simulation_results = eventReactive(input$bus_simulation_go, {
     tmp_raw = list(
       map(1:as.numeric(input$simul_num), function(m) get_bus_inputs(RVlist(), input$simul_num_routes, pass_inputs())),
@@ -129,7 +138,6 @@ app_server <- function( input, output, session ) {
       pmap(function(x, y, z)
         busCapacityCalculate(x, y, rv_exit, 1)
       )
-    
     map(1:4, function(x) get_summary_df(tmp_raw, as.numeric(input$simul_num), x))
     
   })

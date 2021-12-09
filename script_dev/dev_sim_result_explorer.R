@@ -55,6 +55,13 @@ data = sim[[3]]
 
 #load the data here=============================================================
 data = readRDS(here::here("data_dev/data_sim_saved.rds"))
+varibles_list = read.csv("./data_dev/variables_list.csv")
+
+index_resultPlot = varibles_list %>%  
+  filter(Exclude != "X")   
+  
+
+
 
 #VPS bucket data exploration====================================================
 #notes VPS and ICRS are not in a tidy format
@@ -78,13 +85,25 @@ bind_rows(get_summry_statistics(sim[[3]]),
 #make data
 bolo = data %>%
   select(bus_line, bus_line_id, starts_with("bus")) %>%
-  select(!bus_route_door_cond ) %>% 
+  select(!bus_route_door_cond ) %>%
+  unique() %>%
+  pivot_longer(cols = !c(bus_line:bus_id)) %>%
+  select(!c(bus_line_id, bus_id))
+
+bolo_density = get_grouped_density(data = bolo, grp = c(bus_line, names))
+
+bolo = data %>%
+  select(bus_line, bus_line_id, bus_id, index_resultPlot$names_raw) %>% 
   unique() %>%
   pivot_longer(cols = !c(bus_line:bus_id)) %>%  
-  select(!c(bus_line_id, bus_id))  #%>%  
-  arrange(name, bus_line )
+  merge(., index_resultPlot, by.x = "name", by.y = "names_raw") %>%  
+  select(bus_line, bus_line_id, names_p1, value) %>%  
+  arrange(bus_line, names_p1)
 
-bolo_density = get_grouped_density(data = bolo, grp = c(bus_line, name))
+bolo_density = get_grouped_density(data = bolo, grp = c(bus_line, names_p1))
+
+
+
 
 #make plots
 #these two plots do not use the same data
@@ -95,33 +114,71 @@ bolo %>%
   plot_ly(x = ~bus_line, y = ~value, color = ~bus_line,
           type = "box", boxmean = T,
           transforms = list(
-            list(type = 'filter', target = ~name, operation = '=',
-                 value = unique(bolo$name)[1]
+            list(type = 'filter', target = ~names_p1, operation = '=',
+                 value = unique(bolo$names_p1)[1]
             )
           )) %>%
-  layout(xaxis = list(title = "Variable"), yaxis = list(title = "Density"),
+  layout(xaxis = list(title = ""), 
+         yaxis = list(title = ""),
          updatemenus =
            list(
-             make_menu_item(name_list = unique(bolo$name), filter_pos = 0,
+             make_menu_item(name_list = unique(bolo$names_p1), filter_pos = 0, type = "buttons",
                             direction = "down", x = -0.5, y = 1.1)[[1]]
              
            ),
          showlegend = T)
+
+bolo %>%  
+  plot_ly(x = ~bus_line, y = ~value, color = ~bus_line,
+          type = "box", boxmean = T,
+          transforms = list(
+            list(type = 'filter', target = ~names, operation = '=',
+                 value = unique(bolo$names)[1]
+            )
+          )) %>%
+  layout(xaxis = list(title = "yyy"), 
+         yaxis = list(title = "uuuu"),
+         updatemenus =
+           list(
+             make_menu_item(name_list = unique(bolo$names), filter_pos = 0, type = "buttons",
+                            direction = "down", x = -0.5, y = 1.1)[[1]]
+             
+           ),
+         showlegend = T)
+
+bolo %>%  
+  plot_ly(x = ~value, color = ~bus_line,
+          type = "histogram", 
+          transforms = list(
+            list(type = 'filter', target = ~names_p1, operation = '=',
+                 value = unique(bolo$names_p1)[1]
+            )
+          )) %>%
+  layout(xaxis = list(title = "Variable"), 
+         yaxis = list(title = ~names_p1),
+         updatemenus =
+           list(
+             make_menu_item(name_list = unique(bolo$names_p1), filter_pos = 0, type = "buttons",
+                            direction = "down", x = -0.5, y = 1.1)[[1]]
+             
+           ),
+         showlegend = T)
+
 
 bolo_density %>%
   plot_ly(x = ~units, y = ~density, fill = 'tozeroy',#text = ~text,
           type = 'scatter', mode = 'lines', 
           color = ~bus_line,
           transforms = list(
-            list(type = 'filter', target = ~name, operation = '=',
-                 value = unique(bolo$name)[1]
+            list(type = 'filter', target = ~names_p1, operation = '=',
+                 value = unique(bolo$names_p1)[1]
             )
           )) %>%
   layout(xaxis = list(title = "Variable"),
          yaxis = list(title = "Density"),
          updatemenus =
            list(
-             make_menu_item(name_list = unique(bolo_density$name), filter_pos = 0,
+             make_menu_item(name_list = unique(bolo_density$names_p1), filter_pos = 0, type = "buttons",
                             direction = "down", x = -0.5, y = 1.1)[[1]]
              
            ),
