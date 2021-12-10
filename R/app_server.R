@@ -20,76 +20,37 @@ app_server <- function( input, output, session ) {
                  route_num = i)
       })
   })
-  
-  #SECTION: popup messages/modals===============================================
-  #=============================================================================
-  observeEvent(input$contact, {
-    sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
-                     tags$span(style = 'text-align: left;',
-                               tags$h3('Contact Us', style = 'color: #d73926;'),
-                               tags$h4('The Data Informatics Group', style = 'font-weight: 700;'),
-                               tags$p('Based in Seattle, the Data Informatics Group specializes in creating bespoke data \
-                              products that daylight powerful insights and enable our clients to harness the \
-                              full-potential of their data. Reach out to us!'),
-                               tags$div(id = 'contact_table', render_contact_table()))
-    )
-  })
-  
-  observeEvent(input$dist_board, {
-    sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
-                     tags$span(style = 'text-align: left;',
-                               tags$div(id = 'contact_table',renderPlot(make_histogram(input$pass_board, input$pass_board_sd, lmt = T))
-                                        ))
-    )
-  })
-  
-  observeEvent(input$dist_alight, {
-    sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
-                     tags$span(style = 'text-align: left;',
-                               tags$div(id = 'contact_table', renderPlot(make_histogram(input$pass_alight, input$pass_alight_sd, lmt = T))
-                                        ))
-    )
-  })
-  
-  observeEvent(input$view_var, {
-  print(RVlist())
-  #   sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
-  #                    tags$span(style = 'text-align: left;',
-  #                              tags$div(id = 'contact_table', 
-  #                                       DT::renderDataTable({
-  #                                         RVlist() %>%
-  #                                           dt_common(dom = "Bftir",
-  #                                                     y = 600, pl = 8000)
-  #                                       })  
-  #                              ))
-  #   )
-  })
-  
 
+  #SECTION: data initialization=================================================
+  #=============================================================================
+  observeEvent(input$view_var, {
+    print(RVlist())
+  })
+  
   RVlist = reactive({
     reactiveValuesToList(input)
   })
   
   pass_inputs = eventReactive(input$bus_input_go, {
-    print("pass_inputs")
+    # print("pass_inputs")
     get_list_items(RVlist(), string = "simul_duration|pass_board", purrr = F)
   }) 
   
   exit_condition_inputs = eventReactive(input$bus_input_go, {
-    print("exit_condition_inputs")
+    # print("exit_condition_inputs")
     get_list_items(RVlist(), string = "exit_cond_", purrr = F)
   }) 
   
   df_bus = eventReactive(input$bus_input_go, {
     require(pass_inputs())
-    print("df_bus")
+    # print("df_bus")
     get_bus_inputs(RVlist(), input$simul_num_routes, pass_inputs())
     # get_bus_inputs(rv_RVlist, rv_RVlist$simul_num_routes, rv_pass_inputs)
-    print("df_bus_end")
+    # print("df_bus_end")
   })
   
   df_pass = eventReactive(input$bus_input_go, {
-    print("df_pass")
+    # print("df_pass")
     get_pass_inputs(RVlist(), input$simul_num_routes, pass_inputs())
   })
   
@@ -102,6 +63,16 @@ app_server <- function( input, output, session ) {
     sim <<- simulation_results()
   })
 
+  #SECTION: call modules========================================================
+  #=============================================================================
+  callModule(mod_output_dt_server, "summary_tab", .data = simulation_results)
+  
+  # callModule(mod_glassary_tab_server, "glassary_tab_ui_1")
+  # mod_glassary_tab_server("glassary_tab_ui_1")
+  mod_glassary_tab_server("glassary_tab_ui_1")
+  
+  #SECTION: data initialization=================================================
+  #=============================================================================
   output$smmry_bus_routes = DT::renderDataTable({
     df_bus() %>%
       select(bus_line, bus_id, bus_route_cap, bus_arrvl_schl, bus_arrvl_actl) %>%
@@ -151,19 +122,6 @@ app_server <- function( input, output, session ) {
       dt_common(dom = "Bftir",
                 y = 600, pl = 8000)
   })
-  
-  observe({
-    print(variable_list_glos)
-  })
-  
-  output$variable_list = DT::renderDataTable({
-    variable_list_glos %>%
-      dt_common(dom = "Bftir",
-                y = 600, pl = 8000)
-  })
-
-  ## To be copied in the server
-  callModule(mod_output_dt_server, "summary_tab", .data = simulation_results)
 
 
   observe({
@@ -203,8 +161,37 @@ app_server <- function( input, output, session ) {
         )
       )
     
-    #plot modals for bus inputs=================================================
-    #===========================================================================
+    #SECTION: popup messages/modals===============================================
+    #=============================================================================
+    observeEvent(input$contact, {
+      sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
+                       tags$span(style = 'text-align: left;',
+                                 tags$h3('Contact Us', style = 'color: #d73926;'),
+                                 tags$h4('The Data Informatics Group', style = 'font-weight: 700;'),
+                                 tags$p('Based in Seattle, the Data Informatics Group specializes in creating bespoke data \
+                              products that daylight powerful insights and enable our clients to harness the \
+                              full-potential of their data. Reach out to us!'),
+                                 tags$div(id = 'contact_table', render_contact_table()))
+      )
+    })
+    
+    observeEvent(input$dist_board, {
+      sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
+                       tags$span(style = 'text-align: left;',
+                                 tags$div(id = 'contact_table',renderPlot(make_histogram(input$pass_board, input$pass_board_sd, lmt = T))
+                                 ))
+      )
+    })
+    
+    observeEvent(input$dist_alight, {
+      sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
+                       tags$span(style = 'text-align: left;',
+                                 tags$div(id = 'contact_table', renderPlot(make_histogram(input$pass_alight, input$pass_alight_sd, lmt = T))
+                                 ))
+      )
+    })
+    
+    
     #modals for capacity count
     list(1:as.numeric(input$simul_num_routes), "bus_size_", "bus_route_size_", "bus_route_cap_") %>%
       pmap(function(x, y, z, m)
@@ -224,6 +211,8 @@ app_server <- function( input, output, session ) {
         )
       )
     
+    #plot modals for bus inputs=================================================
+    #===========================================================================
     #modals for headway density
     list(1:as.numeric(input$simul_num_routes), "dist_headway_", "bus_route_headway_", "bus_route_headway_sd_") %>%
       pmap(function(x, y, z, m)

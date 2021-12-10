@@ -1,0 +1,6 @@
+﻿Simulation Module,details
+Bus Input,This module is used to initialzie (make) the busses for each simulation. The variables listed in this module detail the unique characteristics for each simulated bus route. The arrival time and passenger inforamtion for each bus is created from these sets of inputs
+Pass Input ,This module is used to initialize (make) passengers for each each simulation. The variables listed in this module detail the passengers arrive the bus bay/berth - these variables are unique to each simlated bus route. The arrival time and boarding information for each passneger is created from these sets of inputs. 
+Simulation Output,This module takes the intilized data from the Bus and Pass Input modules and uses it to simulate bus service. 
+Missed Passengers List,-
+Overview,This application relies upon four distinct modules to run the bus capacity simulation. Each module produces a datatable detailing the variables is uses or produces through the course of each simulation. These tables are recorded at the end of each simulation and can be downloaded by the user. 

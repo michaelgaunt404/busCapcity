@@ -115,12 +115,12 @@ app_ui <- function(request) {
           ),
           #glossary tab=========================================================
           tabItem("glos",
-                  col_10(
-                    box_common(
-                      title = "Glossary for Simulation Variables", 
-                      DT::dataTableOutput("variable_list") %>%  withSpinner()
-                    )
-                  )       
+                  # mod_glossary_ui("glossary")  
+                  
+                  mod_glassary_tab_ui("glassary_tab_ui_1")
+                  
+                  ## To be copied in the server
+                  # mod_glassary_tab_server("glassary_tab_ui_1")
           )
           
         )

@@ -53,7 +53,7 @@ mod_output_dt_server <- function(input, output, session, .data){
                 y = 600, pl = 8000)
   })
   
-  addPopover(session, "bus_summary_table_skimmed", "Data", content = "Hi")
+  # addPopover(session, "bus_summary_table_skimmed", "Data", content = "Hi")
 
   output$bus_summary_table = DT::renderDataTable({
     .data()[[3]] %>% 

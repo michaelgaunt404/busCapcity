@@ -24,7 +24,6 @@ function_name <- function(input_1, input_2) {
 #variable_list===================================================================
 #use this header to make demarcations/section in code [delete this line]
 #short description
-
 variable_list = read.csv("./data_dev/variables_list.csv")
 
 variable_list_glos = variable_list %>%  
@@ -34,8 +33,11 @@ variable_list_glos = variable_list %>%
 index_resultPlot = variable_list %>%  
   filter(Exclude != "X") 
 
-
-
+#module list===================================================================
+#use this header to make demarcations/section in code [delete this line]
+#short description
+simulation_modules = read.csv("./data_dev/simulation_modules.csv") 
+colnames(simulation_modules) = c("Simulation Modules", "Details")
 
 
 #script end=====================================================================
