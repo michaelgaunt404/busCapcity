@@ -31,7 +31,7 @@ library(janitor)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #content in this section should be removed if in production - ok for dev
 source(here::here("script_dev/helpers_general.r"))
-source(here::here("script_dev/helpers_plotly.r"))
+source(here::here("r/helpers_plotly.r"))
 source(here::here("script_dev/helpers_DT.r"))
 source(here::here("R/bus_capcity_helpers.r"))
 
@@ -90,7 +90,7 @@ bolo = data %>%
   pivot_longer(cols = !c(bus_line:bus_id)) %>%
   select(!c(bus_line_id, bus_id))
 
-bolo_density = get_grouped_density(data = bolo, grp = c(bus_line, names))
+bolo_density = get_grouped_density(data = bolo, grp = c(bus_line, name))
 
 bolo = data %>%
   select(bus_line, bus_line_id, bus_id, index_resultPlot$names_raw) %>% 

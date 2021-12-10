@@ -54,7 +54,7 @@ mod_output_dt_server <- function(input, output, session, .data){
   })
   
   # addPopover(session, "bus_summary_table_skimmed", "Data", content = "Hi")
-
+  
   output$bus_summary_table = DT::renderDataTable({
     .data()[[3]] %>% 
       select(starts_with('bus_'), "simulation_num") %>%  
@@ -73,7 +73,7 @@ mod_output_dt_server <- function(input, output, session, .data){
       dt_common(dom = "Bftir",
                 y = 600, pl = 8000)
   })
-
+  
 }
     
 ## To be copied in the UI

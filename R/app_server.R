@@ -42,7 +42,7 @@ app_server <- function( input, output, session ) {
   }) 
   
   df_bus = eventReactive(input$bus_input_go, {
-    require(pass_inputs())
+    # require(pass_inputs())
     # print("df_bus")
     get_bus_inputs(RVlist(), input$simul_num_routes, pass_inputs())
     # get_bus_inputs(rv_RVlist, rv_RVlist$simul_num_routes, rv_pass_inputs)
@@ -66,10 +66,13 @@ app_server <- function( input, output, session ) {
   #SECTION: call modules========================================================
   #=============================================================================
   callModule(mod_output_dt_server, "summary_tab", .data = simulation_results)
+  mod_result_viz_server("yolo_check", .data = simulation_results)
   
   # callModule(mod_glassary_tab_server, "glassary_tab_ui_1")
   # mod_glassary_tab_server("glassary_tab_ui_1")
   mod_glassary_tab_server("glassary_tab_ui_1")
+  # mod_result_viz_server("result_viz_ui_1")
+  # mod_result_viz_server
   
   #SECTION: data initialization=================================================
   #=============================================================================

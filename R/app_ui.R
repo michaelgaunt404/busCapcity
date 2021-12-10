@@ -42,12 +42,11 @@ app_ui <- function(request) {
                                                       # ,mod_sim_inputs_noBox_ui("global_inputs")
                                                       
                                              )
-                                             ,menuItem("Simulation Results", 
-                                                       tabName = "simul_result", 
-                                                       icon = icon("stream"),
-                                                       startExpanded = F
-                                                       # , 
-                                                       # downloadLink('downloadData', 'Download')
+                                             ,menuItem("Simulation Results"
+                                                       ,icon = icon("stream"),startExpanded = T
+                                                       ,menuSubItem("Old Tab", tabName = "simul_result")
+                                                       ,menuSubItem("Visualization", tabName = "results_vis")
+                                                       ,menuSubItem("Raw Data", tabName = "results_raw_data")
                                              )
                                              ,menuItem("Debug and Dev", 
                                                        tabName = "debug_dev", 
@@ -69,7 +68,6 @@ app_ui <- function(request) {
           tabItem("db",
                   col_3(
                     mod_simulation_inputs_ui("global_inputs")
-                    #   # mod_sim_inputs_noBox_ui("sim_inputs_noBox_ui_1")
                   ),
                   col_9(
                     box_common(
@@ -101,26 +99,30 @@ app_ui <- function(request) {
                     )
                   ) 
           ), 
-          #timeline tab=========================================================
+          #RESULTS: base tab tab==================================================
           tabItem("simul_result",
                   col_4(
                     box_common(
                       title = "Aggregated Simulation Metrics", 
-                      DT::dataTableOutput("results_summary_stats") %>%  withSpinner()
+                      DT::dataTableOutput("results_summary_stats") %>%  
+                        withSpinner()
                     )
                   ),
                   col_8(
                     mod_output_dt_ui("summary_tab") 
                   )        
           ),
+          #RESULTS: temp VIS tab================================================
+          tabItem("results_vis"
+                  ,mod_result_viz_ui("yolo_check")
+          ),
+          #RESULTS: temp RAW_Data tab===========================================
+          tabItem("results_raw_data"
+          ),
           #glossary tab=========================================================
           tabItem("glos",
-                  # mod_glossary_ui("glossary")  
-                  
+
                   mod_glassary_tab_ui("glassary_tab_ui_1")
-                  
-                  ## To be copied in the server
-                  # mod_glassary_tab_server("glassary_tab_ui_1")
           )
           
         )
