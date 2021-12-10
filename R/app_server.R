@@ -151,6 +151,16 @@ app_server <- function( input, output, session ) {
       dt_common(dom = "Bftir",
                 y = 600, pl = 8000)
   })
+  
+  observe({
+    print(variable_list_glos)
+  })
+  
+  output$variable_list = DT::renderDataTable({
+    variable_list_glos %>%
+      dt_common(dom = "Bftir",
+                y = 600, pl = 8000)
+  })
 
   ## To be copied in the server
   callModule(mod_output_dt_server, "summary_tab", .data = simulation_results)

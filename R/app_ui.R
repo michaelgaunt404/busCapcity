@@ -43,17 +43,23 @@ app_ui <- function(request) {
                                                       
                                              )
                                              ,menuItem("Simulation Results", 
-                                                      tabName = "simul_result", 
-                                                      icon = icon("stream"),
-                                                      startExpanded = F
-                                                      # , 
-                                                      # downloadLink('downloadData', 'Download')
-                                                      )
+                                                       tabName = "simul_result", 
+                                                       icon = icon("stream"),
+                                                       startExpanded = F
+                                                       # , 
+                                                       # downloadLink('downloadData', 'Download')
+                                             )
                                              ,menuItem("Debug and Dev", 
                                                        tabName = "debug_dev", 
                                                        icon = icon("bug"),
                                                        startExpanded = F,
-                                                       mod_get_variables_ui("get_variables_ui_1"))
+                                                       mod_get_variables_ui("get_variables_ui_1")
+                                             )
+                                             ,menuItem("Glosary", 
+                                                       tabName = "glos", 
+                                                       icon = icon("book"),
+                                                       startExpanded = F
+                                             )
                                  )
       ),
       #body==============================================================================================================================================================================
@@ -63,7 +69,7 @@ app_ui <- function(request) {
           tabItem("db",
                   col_3(
                     mod_simulation_inputs_ui("global_inputs")
-                  #   # mod_sim_inputs_noBox_ui("sim_inputs_noBox_ui_1")
+                    #   # mod_sim_inputs_noBox_ui("sim_inputs_noBox_ui_1")
                   ),
                   col_9(
                     box_common(
@@ -73,24 +79,24 @@ app_ui <- function(request) {
                     splitLayout(
                       cellWidths = c("50%", "50%"),
                       box_common(title = "Bus Route Input Summary",
-                                     collapsed = T,
-                                     list(
-                                       "This table details simulated buses given user provided inputs.",
-                                       br(),
-                                       "It is repersentative of each simulation if more than one simulation is ran.",
-                                       br(),
-                                       DT::dataTableOutput("smmry_bus_routes") %>%  withSpinner()
-                                     )
+                                 collapsed = T,
+                                 list(
+                                   "This table details simulated buses given user provided inputs.",
+                                   br(),
+                                   "It is repersentative of each simulation if more than one simulation is ran.",
+                                   br(),
+                                   DT::dataTableOutput("smmry_bus_routes") %>%  withSpinner()
+                                 )
                       ), 
                       box_common(title = "Passengers Input Summary",
-                                     collapsed = T,
-                                     list(
-                                       "This table details simulated passengers given user provided inputs.",
-                                       br(),
-                                       "It is repersentative of each simulation if more than one simulation is ran.",
-                                       br(),
-                                     plotlyOutput("pass_arrvl_dist") %>%  withSpinner()
-                                     )
+                                 collapsed = T,
+                                 list(
+                                   "This table details simulated passengers given user provided inputs.",
+                                   br(),
+                                   "It is repersentative of each simulation if more than one simulation is ran.",
+                                   br(),
+                                   plotlyOutput("pass_arrvl_dist") %>%  withSpinner()
+                                 )
                       ) 
                     )
                   ) 
@@ -106,7 +112,17 @@ app_ui <- function(request) {
                   col_8(
                     mod_output_dt_ui("summary_tab") 
                   )        
+          ),
+          #glossary tab=========================================================
+          tabItem("glos",
+                  col_10(
+                    box_common(
+                      title = "Glossary for Simulation Variables", 
+                      DT::dataTableOutput("variable_list") %>%  withSpinner()
+                    )
+                  )       
           )
+          
         )
       )
       # ,
