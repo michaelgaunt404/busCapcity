@@ -10,7 +10,7 @@
 mod_result_viz_ui <- function(id){
   ns <- NS(id)
   tagList(
-    col_4(
+    col_8(
       box(title = "Simulation Module Description" 
           ,closable = F ,collapsed = F ,collapsible = T 
           ,width = "100%" ,solidHeader = T, status = "primary"

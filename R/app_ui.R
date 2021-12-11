@@ -86,16 +86,32 @@ app_ui <- function(request) {
                                    DT::dataTableOutput("smmry_bus_routes") %>%  withSpinner()
                                  )
                       ), 
-                      box_common(title = "Passengers Input Summary",
-                                 collapsed = T,
-                                 list(
-                                   "This table details simulated passengers given user provided inputs.",
-                                   br(),
-                                   "It is repersentative of each simulation if more than one simulation is ran.",
-                                   br(),
-                                   plotlyOutput("pass_arrvl_dist") %>%  withSpinner()
-                                 )
-                      ) 
+                      # box_common(title = "Passengers Input Summary",
+                      #            collapsed = T,
+                      #            list(
+                      #              "This table details simulated passengers given user provided inputs.",
+                      #              br(),
+                      #              "It is repersentative of each simulation if more than one simulation is ran.",
+                      #              br(),
+                      #              plotlyOutput("pass_arrvl_dist") %>%  withSpinner()
+                      #            )
+                      # ) 
+                      tabBox(
+                        width = "100%",
+                        tabPanel(
+                          "Quick Statistics", 
+                          plotlyOutput("pass_arrvl_cumm") %>%  withSpinner()
+                        ),
+                        tabPanel(
+                          "Quick Statistics", 
+                          plotlyOutput("pass_arrvl_hist") %>%  withSpinner()
+                        )
+                      )
+                      
+                      
+                      
+                      
+                      
                     )
                   ) 
           ), 

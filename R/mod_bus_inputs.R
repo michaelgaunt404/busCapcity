@@ -64,9 +64,9 @@ mod_bus_inputs_server <- function(input, output, session, route_num){
       ),
       strong("Route Passenger Boarding Inputs"),
       splitLayout(cellWidths = c("45%", "40%", "15%"),
-                  numericInput(inputId  = paste0("bus_route_pass_", route_num) , label = "Pass. per hour:", min = 0, max = 1000, step = 1, value = 200) %>% 
+                  numericInput(inputId  = paste0("bus_route_pass_", route_num) , label = "Pass. per hour:", min = 0, max = 500, step = 10, value = 40) %>% 
                     tipify(title = "The number of passengers (boarding) serviced by each route per hour. Please input <strong>1</strong> if you wish to model a bus route that does not pick up any passengers."),
-                  numericInput(inputId  = paste0("bus_route_pass_sd_", route_num) , label = "Pass. Arrvl. SD (sec):", min = 0, max = 90, step = 1, value = 15) %>% 
+                  numericInput(inputId  = paste0("bus_route_pass_sd_", route_num) , label = "Pass. Arrvl. SD (sec):", min = 0, max = 500, step = 1, value = 120) %>% 
                     tipify('<p>This standard deviation value is used to calculate a random normal value which is applied to each theoretical passenger arrival.</p> <p>Uses normal distribution - centered around zero (no delay or early arrival), a zero standard deviation will result in uniform arrival with a constant rate.</p>'),
                   actionButton(inputId  = paste0("dist_route_pass_", route_num), label = icon("eye")),
                   tags$style(type='text/css', str_glue("#dist_route_pass_{route_num} {{margin-top: 25px;}}"))

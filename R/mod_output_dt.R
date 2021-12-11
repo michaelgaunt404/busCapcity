@@ -25,7 +25,7 @@ mod_output_dt_ui <- function(id){
         DT::dataTableOutput(ns("bus_summary_table_skimmed"))
       ),
       tabPanel(
-        "Bus Summary Table", 
+        "Ini", 
         DT::dataTableOutput(ns("bus_summary_table")) %>%  
           withSpinner()
       ),

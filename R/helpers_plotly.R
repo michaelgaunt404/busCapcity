@@ -25,16 +25,17 @@ function_name <- function(input_1, input_2) {
 #use this header to make demarcations/section in code [delete this line]
 # function helps make density values in plotly
 # no density plot functions in 
-get_grouped_density = function(data, grp = ...){
+# currently requires target column to be a value
+get_grouped_density = function(data, value = "value",  grp = ...){
   data %>% 
     group_by(across({{grp}})) %>% 
     nest() %>% 
     mutate(density = map(data,
                          ~{
                            molo = .x %>%  
-                             .$value %>% 
+                             # .$value %>% pass_arrvl 
+                             .[[value]] %>% 
                              density()
-                           
                            data.frame(units = molo$x, 
                                       density = molo$y)}
     )) %>%  

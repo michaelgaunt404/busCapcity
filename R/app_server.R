@@ -83,16 +83,42 @@ app_server <- function( input, output, session ) {
                 y = 290, pl = 800)
   })
   
-  output$pass_arrvl_dist = renderPlotly({
-    chart = df_pass() %>%
-      ggplot() +
-      geom_freqpoly(aes(pass_arrvl, color = bus_line), binwidth = 60*5) +
-      labs(x = "Passenger Arrival (sec)", title = "Distribution of Passenger Arrivals") +
-      scale_color_viridis_d() +
-      theme_classic()
+  output$pass_arrvl_cumm = renderPlotly({
+    temp = df_pass()  %>%  
+      # rv_df_pass %>% 
+      group_by(bus_line) %>% 
+      mutate(total = dplyr::row_number()) 
     
-    plotly::ggplotly(chart)
+    temp %>%  
+      plotly::plot_ly(x=~pass_arrvl/60,y=~total, color=~bus_line, mode = "lines") %>% 
+      plotly::layout(xaxis = list(title = "Arrival Time (minutes)"), 
+                     yaxis = list(title = "Count"),
+                     showlegend = T,
+                     legend = list(orientation = 'h', position = "top"))
+  })
+  
+  output$pass_arrvl_hist = renderPlotly({
+    df_pass() %>%  
+    # rv_df_pass %>% 
+    group_by(bus_line) %>%
+        do(p = plot_ly(., x=~(pass_arrvl/60),
+                               type = "histogram")) %>%
+      subplot(nrows = NROW(.), shareX = TRUE) %>% 
+      plotly::layout(xaxis = list(title = "Arrival Time (minutes)"), 
+                     yaxis = list(title = "Count"),
+                     showlegend = T,
+                     legend = list(orientation = 'h', position = "top"))
     
+    
+    # df_pass() %>%  
+    #   rv_df_pass %>% 
+    #   plotly::plot_ly(type = "histogram") %>%  
+    #   group_by(bus_line) %>% 
+    #   plotly::add_histogram(x=~(pass_arrvl/60)) %>%  
+    #   plotly::layout(xaxis = list(title = "Arrival Time (minutes)"), 
+    #                  yaxis = list(title = "Count"),
+    #                  showlegend = T,
+    #                  legend = list(orientation = 'h', position = "top"))
   })
   
   # output$downloadData <- downloadHandler(

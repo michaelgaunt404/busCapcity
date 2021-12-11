@@ -257,5 +257,13 @@ bolo_density %>%
   highlight(on = "plotly_hover", off = "plotly_doubleclick")
 
 
+#passenger visualizations=======================================================
+#two ways to do it - summaries each variable and bus over all simulations or 
+
+
+
+
+
+
 #script end=====================================================================
 
