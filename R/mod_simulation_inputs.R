@@ -30,7 +30,7 @@ mod_simulation_inputs_ui <- function(id){
                                  step = 1,
                                  value = 60), 
                     numericInput("simul_num",
-                                 "Number of Simulations", 
+                                 "# of Simulations", 
                                  min = 1, 
                                  max = 100, 
                                  step = 1,

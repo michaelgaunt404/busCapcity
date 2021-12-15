@@ -66,13 +66,11 @@ app_server <- function( input, output, session ) {
   #SECTION: call modules========================================================
   #=============================================================================
   callModule(mod_output_dt_server, "summary_tab", .data = simulation_results)
+  
   mod_result_viz_server("yolo_check", .data = simulation_results)
   
-  # callModule(mod_glassary_tab_server, "glassary_tab_ui_1")
-  # mod_glassary_tab_server("glassary_tab_ui_1")
   mod_glassary_tab_server("glassary_tab_ui_1")
-  # mod_result_viz_server("result_viz_ui_1")
-  # mod_result_viz_server
+
   
   #SECTION: data initialization=================================================
   #=============================================================================
@@ -85,7 +83,7 @@ app_server <- function( input, output, session ) {
   
   output$pass_arrvl_cumm = renderPlotly({
     temp = df_pass()  %>%  
-      # rv_df_pass %>% 
+      # rv_df_pass %>%
       group_by(bus_line) %>% 
       mutate(total = dplyr::row_number()) 
     
@@ -93,32 +91,23 @@ app_server <- function( input, output, session ) {
       plotly::plot_ly(x=~pass_arrvl/60,y=~total, color=~bus_line, mode = "lines") %>% 
       plotly::layout(xaxis = list(title = "Arrival Time (minutes)"), 
                      yaxis = list(title = "Count"),
-                     showlegend = T,
-                     legend = list(orientation = 'h', position = "top"))
+                     showlegend = T,legend = list(orientation = 'h',x = 0, y = 1))
   })
   
   output$pass_arrvl_hist = renderPlotly({
-    df_pass() %>%  
-    # rv_df_pass %>% 
-    group_by(bus_line) %>%
-        do(p = plot_ly(., x=~(pass_arrvl/60),
-                               type = "histogram")) %>%
-      subplot(nrows = NROW(.), shareX = TRUE) %>% 
-      plotly::layout(xaxis = list(title = "Arrival Time (minutes)"), 
-                     yaxis = list(title = "Count"),
-                     showlegend = T,
-                     legend = list(orientation = 'h', position = "top"))
-    
-    
-    # df_pass() %>%  
-    #   rv_df_pass %>% 
-    #   plotly::plot_ly(type = "histogram") %>%  
-    #   group_by(bus_line) %>% 
-    #   plotly::add_histogram(x=~(pass_arrvl/60)) %>%  
-    #   plotly::layout(xaxis = list(title = "Arrival Time (minutes)"), 
-    #                  yaxis = list(title = "Count"),
-    #                  showlegend = T,
-    #                  legend = list(orientation = 'h', position = "top"))
+    temp = 
+      df_pass() %>%  
+      # rv_df_pass %>%
+      mutate(pass_arrvl = (pass_arrvl/60)) %>% 
+      ggplot() + 
+      geom_histogram(aes(pass_arrvl, fill = bus_line), binwidth = 5) + 
+      facet_grid(rows = vars(bus_line)) + 
+      theme_classic() + 
+      labs(x = "Arrival Time (minutes)", 
+           y = "Count")
+      
+      plotly::ggplotly(temp) %>%  
+        plotly::layout(showlegend = T,legend = list(orientation = 'h',x = 0, y = 1.05))
   })
   
   # output$downloadData <- downloadHandler(

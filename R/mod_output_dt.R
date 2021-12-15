@@ -21,16 +21,16 @@ mod_output_dt_ui <- function(id){
       id = "tabset1", 
       height = "250px",
       tabPanel(
-        "Quick Statistics", 
+        "Statistics for all Variables", 
         DT::dataTableOutput(ns("bus_summary_table_skimmed"))
       ),
       tabPanel(
-        "Ini", 
+        "Bus Metrics", 
         DT::dataTableOutput(ns("bus_summary_table")) %>%  
           withSpinner()
       ),
       tabPanel(
-        "Pass Summary Table", 
+        "Passenger Metrics", 
         DT::dataTableOutput(ns("pass_summary_table"))
       )
     )

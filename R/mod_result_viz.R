@@ -10,13 +10,14 @@
 mod_result_viz_ui <- function(id){
   ns <- NS(id)
   tagList(
-    col_8(
+    #might end up combining the table with the metrics here
+    # col_8(
       box(title = "Simulation Module Description" 
           ,closable = F ,collapsed = F ,collapsible = T 
           ,width = "100%" ,solidHeader = T, status = "primary"
           ,plotly::plotlyOutput(ns("viz_boxplot"))
       )
-    )
+    # )
     
   )
 }
@@ -31,16 +32,13 @@ mod_result_viz_server <- function(id, .data){
     
     output$viz_boxplot = plotly::renderPlotly({
       temp = .data()[[3]] %>%
-        # sim[[3]]  %>% 
+        # sim[[3]]  %>%
         select(bus_line, bus_line_id, bus_id, index_resultPlot$names_raw) %>% 
         unique() %>%
         pivot_longer(cols = !c(bus_line:bus_id)) %>%  
         merge(., index_resultPlot, by.x = "name", by.y = "names_raw") %>%  
         select(bus_line, bus_line_id, names_p1, value) %>%  
         arrange(bus_line, names_p1)
-      
-      temp %>%  
-        print()
       
       temp %>%  
         plotly::plot_ly(x = ~bus_line, y = ~value, color = ~bus_line,
@@ -51,14 +49,17 @@ mod_result_viz_server <- function(id, .data){
                           )
                         )) %>%
         plotly::layout(xaxis = list(title = ""), 
-                       yaxis = list(title = ""),
+                       yaxis = list(title = "", rangemode = "tozero"),
                        updatemenus =
                          list(
-                           make_menu_item(name_list = unique(temp$names_p1), filter_pos = 0, type = "buttons",
-                                          direction = "down", x = -0.5, y = 1.1)[[1]]
-                           
-                         ),
-                       showlegend = T)
+                           make_menu_item(name_list = unique(temp$names_p1), filter_pos = 0
+                                          ,xanchor = "left" ,yanchor = "top" ,x = 1 ,y = 1
+                                          ,direction = "down" ,type = "dropdown"
+                                          )[[1]]
+                         )
+                       ,legend = list(orientation = "h"
+                                      ,x = 0 ,y = 1.1)
+                       ,showlegend = T)
     })
     
   })

@@ -59,9 +59,6 @@ varibles_list = read.csv("./data_dev/variables_list.csv")
 
 index_resultPlot = varibles_list %>%  
   filter(Exclude != "X")   
-  
-
-
 
 #VPS bucket data exploration====================================================
 #notes VPS and ICRS are not in a tidy format
