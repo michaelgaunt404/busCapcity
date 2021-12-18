@@ -181,6 +181,19 @@ app_server <- function( input, output, session ) {
     
     #SECTION: popup messages/modals===============================================
     #=============================================================================
+    #intro modal
+    observeEvent("", {
+      showModal(modalDialog(
+        includeHTML("./inst/app/www/modal_intro.html")
+        ,size = "l"
+        ,easyClose = TRUE
+      ))
+    })
+    
+    
+    
+    # modal(trigger = "", msg = includeHTML("./inst/app/www/intro_back.html"))
+    
     observeEvent(input$contact, {
       sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
                        tags$span(style = 'text-align: left;',

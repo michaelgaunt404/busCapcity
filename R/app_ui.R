@@ -24,7 +24,7 @@ app_ui <- function(request) {
                 actionLink('contact', label = '', icon = icon('envelope-o', class = 'fa-lg'))),
         tags$li(class = 'dropdown',
                 tags$a(href = "https://www.wsp.com/en-GL", target = "_blank",
-                       tags$img(height = "20px", alt = "WSP USA ©", src = "./inst/app/www/wsp_logo.png")))
+                       tags$img(height = "20px", alt = "WSP USA ©", src = "www/wsp_logo.png")))
       ),
       #footer==============================================================================================================================================================================
       # footer = dashboardFooter(
