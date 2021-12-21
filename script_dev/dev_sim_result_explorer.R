@@ -30,10 +30,13 @@ library(janitor)
 #source helpers/utilities=======================================================
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #content in this section should be removed if in production - ok for dev
-source(here::here("script_dev/helpers_general.r"))
+# source(here::here("script_dev/helpers_general.r"))
 source(here::here("r/helpers_plotly.r"))
-source(here::here("script_dev/helpers_DT.r"))
+source(here::here("r/utils_helpers_general.r"))
+# source(here::here("script_dev/helpers_DT.r"))
 source(here::here("R/bus_capcity_helpers.r"))
+source(here::here("R/golem_utils_server.r"))
+
 
 input = list(cols_to_pivot = cols_to_pivot, 
              hist_transfrom = "identity", 
@@ -52,6 +55,9 @@ input = list(cols_to_pivot = cols_to_pivot,
 sim #get this from the observe statement - simulation has to be ran 
 
 data = sim[[3]]
+
+data %>%  
+  clipr::write_clip()
 
 #load the data here=============================================================
 data = readRDS(here::here("data_dev/data_sim_saved.rds"))
@@ -254,11 +260,89 @@ bolo_density %>%
   highlight(on = "plotly_hover", off = "plotly_doubleclick")
 
 
-#passenger visualizations=======================================================
-#two ways to do it - summaries each variable and bus over all simulations or 
 
 
+temp = sim[[3]]  %>%
+  mutate(bus_total_operation = bus_delay_entry  + bus_service_time + bus_delay_exit) %>% 
+  select(bus_line, bus_line_id, bus_id, index_resultPlot$names_raw) %>% 
+  unique() %>%
+  pivot_longer(cols = !c(bus_line:bus_id)) %>%  
+  merge(., index_resultPlot, by.x = "name", by.y = "names_raw") %>%  
+  select(bus_line, bus_line_id, names_p1, value) %>%  
+  arrange(bus_line, names_p1) 
+  
 
+temp %>%  
+  plotly::plot_ly(x = ~bus_line, y = ~value, color = ~bus_line,
+                  type = "box", boxmean = T,
+                  transforms = list(
+                    list(type = 'filter', target = ~names_p1, operation = '=',
+                         value = unique(temp$names_p1)[1]
+                    )
+                  )) %>%
+  plotly::layout(xaxis = list(title = ""), 
+                 yaxis = list(title = "", rangemode = "tozero"),
+                 updatemenus =
+                   list(
+                     make_menu_item(name_list = unique(temp$names_p1), filter_pos = 0
+                                    ,xanchor = "left" ,yanchor = "top" ,x = 1 ,y = 1
+                                    ,direction = "down" ,type = "dropdown"
+                     )[[1]]
+                   )
+                 ,legend = list(orientation = "h"
+                                ,x = 0 ,y = 1.1)
+                 ,showlegend = T)
+
+
+#total wait visualizations=======================================================
+
+data %>%  
+  select(-starts_with("pass_")) %>%
+  unique() %>% 
+  # select(where(is.numeric)) %>% 
+  mutate(check = bus_service_time + bus_delay_exit) %>%
+  mutate(check1 = bus_delay_entry  + bus_service_time + bus_delay_exit)
+  mutate(service_time_ratio = bus_service_time_alight/bus_service_time_board,
+         delay_total_ratio = bus_delay_entry/)
+  mutate(across())
+  # filter(simulation_num == 1) %>%  
+  # clipr::write_clip()
+  # unique() %>% 
+  ggplot() + 
+  geom_point(aes(bus_time_inBerth , bus_delay_total)) + 
+  xlim(0, 120)
+    
+  data %>%  
+    select(bus_pass_alight, bus_service_time_alight, bus_delay_entry, bus_service_time_board) %>% 
+    # select(-starts_with("pass_")) %>% 
+    unique() %>% 
+    # select(where(is.numeric)) %>% 
+    cor() %>% 
+    corrplot::corrplot()
+  # filter(simulation_num == 1) %>%  
+  # clipr::write_clip()
+  # unique() %>% 
+  ggplot() + 
+    geom_point(aes()) 
+
+  
+  data %>%  
+    select(-starts_with("pass_")) %>%
+    unique() %>%  
+    mutate(index = dplyr::row_number(), 
+           sum =  bus_delay_entry  + bus_service_time + bus_delay_exit) %>% 
+    pivot_longer(cols = c( bus_delay_entry, bus_service_time, bus_delay_exit)) %>%  
+    select(index, name, value) %>%  
+    unique() %>% 
+    ggplot() +
+    # + geom_tile(aes(index, name, fill = value ))
+  geom_line(aes(index, value, color = name))
+  geom_col(aes(index, value, fill = name))
+    
+    
+    
+    
+    
 
 
 

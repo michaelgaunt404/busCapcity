@@ -49,6 +49,10 @@ dgt2 = function(x){
   round(x, 2)
 }
 
+dgt0 = function(x){
+  round(x, 0)
+}
+
 #corrects column to start with zero 
 crrct0 = function(x){
   x-x[1]
@@ -57,6 +61,11 @@ crrct0 = function(x){
 #function: changes negative to zero
 lmt0 = function(x){
   ifelse(x<0, 0, x)
+}
+
+lmt_between = function(x, L = 0, H = 1){
+  ifelse(x<L, L, x) %>%  
+    ifelse(.>H, H, .)
 }
 
 

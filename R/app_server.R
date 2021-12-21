@@ -120,14 +120,17 @@ app_server <- function( input, output, session ) {
   # )
   
   simulation_results = eventReactive(input$bus_simulation_go, {
-    tmp_raw = list(
+    tmp_raw <<- list(
       map(1:as.numeric(input$simul_num), function(m) get_bus_inputs(RVlist(), input$simul_num_routes, pass_inputs())),
       map(1:as.numeric(input$simul_num), function(m) get_pass_inputs(RVlist(), input$simul_num_routes, pass_inputs()))  
-    ) %>%  
+    ) 
+    
+    temp_raw = tmp_raw %>%  
       pmap(function(x, y, z)
-        busCapacityCalculate(x, y, rv_exit, 1)
+        busCapacityCalculate(x, y, rv_exit, input$simul_num_berths)
       )
-    map(1:4, function(x) get_summary_df(tmp_raw, as.numeric(input$simul_num), x))
+    
+    map(1:4, function(x) get_summary_df(temp_raw, as.numeric(input$simul_num), x))
     
   })
  
@@ -140,7 +143,6 @@ app_server <- function( input, output, session ) {
       dt_common(dom = "Bftir",
                 y = 600, pl = 8000)
   })
-
 
   observe({
     require(input$simul_num_routes)
@@ -182,17 +184,7 @@ app_server <- function( input, output, session ) {
     #SECTION: popup messages/modals===============================================
     #=============================================================================
     #intro modal
-    observeEvent("", {
-      showModal(modalDialog(
-        includeHTML("./inst/app/www/modal_intro.html")
-        ,size = "l"
-        ,easyClose = TRUE
-      ))
-    })
-    
-    
-    
-    # modal(trigger = "", msg = includeHTML("./inst/app/www/intro_back.html"))
+    # modal(trigger = "", msg = includeHTML("./inst/app/www/modal_intro.html"))
     
     observeEvent(input$contact, {
       sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =

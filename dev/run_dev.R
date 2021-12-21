@@ -8,8 +8,8 @@
   
   # Document and reload your package
   golem::document_and_reload()
-  
-  # Run the application
+
+    # Run the application
   run_app()
 }
 
