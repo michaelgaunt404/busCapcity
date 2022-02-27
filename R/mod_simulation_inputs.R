@@ -17,11 +17,11 @@ mod_simulation_inputs_ui <- function(id){
         width = "100%", 
         solidHeader = T, 
         status = "primary",
-        actionButton("bus_input_go", "View Bus Inputs") %>%  
-          tipify(title = "Step 1: Click this button to review the inputs you have provided below."),
-        actionButton("bus_simulation_go", "Run Simulation") %>%  
-          tipify(title = "Step 2: If you have reviewed your inputs, click this button to intiate the simulations."), 
-        hr(),
+        # actionButton("bus_input_go", "View Bus Inputs") %>%  
+        #   tipify(title = "Step 1: Click this button to review the inputs you have provided below."),
+        # actionButton("bus_simulation_go", "Run Simulation") %>%  
+        #   tipify(title = "Step 2: If you have reviewed your inputs, click this button to intiate the simulations."), 
+        # hr(),
         splitLayout(cellWidths = c("50%", "40%"),
                     numericInput("simul_duration",
                                  "Simulation Duration (min)", 

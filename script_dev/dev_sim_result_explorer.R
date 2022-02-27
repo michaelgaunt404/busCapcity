@@ -54,12 +54,13 @@ input = list(cols_to_pivot = cols_to_pivot,
 #needs to be written out
 sim #get this from the observe statement - simulation has to be ran 
 
-data = sim[[3]]
+data = sim
 
 data %>%  
   clipr::write_clip()
 
 #load the data here=============================================================
+saveRDS(sim, here::here("data_dev/data_sim_saved.rds"))
 data = readRDS(here::here("data_dev/data_sim_saved.rds"))
 varibles_list = read.csv("./data_dev/variables_list.csv")
 

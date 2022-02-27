@@ -15,7 +15,7 @@ app_ui <- function(request) {
     dashboardPage(
       # introjsUI(), #enables js intro turorial
       
-      shinybusy::add_busy_bar(color = "#FF0000"),
+      # shinybusy::add_busy_bar(color = "#FF0000"),
       #header==============================================================================================================================================================================
       header = dashboardHeader(
         title = "Bus Capacity Modeler",
@@ -34,13 +34,23 @@ app_ui <- function(request) {
       #sidebar==============================================================================================================================================================================
       sidebar = dashboardSidebar(width  = 300,
                                  sidebarMenu(id = "tabs",
-                                             menuItem("Step 1:  Simulation Setup"
+                                             menuItem("Simulation Setup"
                                                       # ,tabName = "db"
                                                       ,icon = icon("toolbox")
-                                                      ,startExpanded = F
+                                                      ,startExpanded = T
                                                       # ,selected = T
                                                       ,menuSubItem("Define Inputs", tabName = "db")
                                                       ,menuSubItem("View Initialized Inputs", tabName = "simul_initial")
+                                                      
+                                                      # bus_input_go_2
+                                                      
+                                                      ,mod_input_validate_ui("input_validate_ui_1")
+                                                      
+                                                      ,actionButton("bus_input_go", "View Bus Inputs") %>%  
+                                                        tipify(title = "Step 1: Click this button to review the inputs you have provided below.")
+                                                      ,actionButton("bus_simulation_go", "Run Simulation") %>%
+                                                        tipify(title = "Step 2: If you have reviewed your inputs, click this button to intiate the simulations.")
+                                                      ,hr()
                                                       # ,mod_sim_inputs_noBox_ui("global_inputs")
                                                       
                                              )

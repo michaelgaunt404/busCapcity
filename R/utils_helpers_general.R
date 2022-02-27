@@ -9,7 +9,7 @@
 #
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #plusEqual operator
-`%+=%` = function(e1,e2) eval.parent(substitute(e1 <- e1 + e2))
+`%+=%` = function(e1,e2) eval.parent(substitute(e1 <<- e1 + e2))
 
 #evaluate string functions
 #eg works if var is "input$something > num" in shiny

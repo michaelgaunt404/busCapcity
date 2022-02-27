@@ -20,37 +20,41 @@ app_server <- function( input, output, session ) {
                  route_num = i)
       })
   })
-
-  #SECTION: data initialization=================================================
-  #=============================================================================
-  observeEvent(input$view_var, {
-    print(RVlist())
-  })
   
+  #SECTION: data initialization=================================================
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  modal_counter <<- 0
+  
+  var_check_bus <<-F
+
   RVlist = reactive({
     reactiveValuesToList(input)
   })
   
   pass_inputs = eventReactive(input$bus_input_go, {
-    # print("pass_inputs")
+    req(val_bus_input() == T)
+    print("pass_inputs")
     get_list_items(RVlist(), string = "simul_duration|pass_board", purrr = F)
   }) 
   
   exit_condition_inputs = eventReactive(input$bus_input_go, {
-    # print("exit_condition_inputs")
+    req(val_bus_input() == T)
+    print("exit_condition_inputs")
     get_list_items(RVlist(), string = "exit_cond_", purrr = F)
   }) 
   
   df_bus = eventReactive(input$bus_input_go, {
+    req(val_bus_input() == T)
     # require(pass_inputs())
-    # print("df_bus")
+    print("df_bus")
     get_bus_inputs(RVlist(), input$simul_num_routes, pass_inputs())
     # get_bus_inputs(rv_RVlist, rv_RVlist$simul_num_routes, rv_pass_inputs)
     # print("df_bus_end")
   })
   
   df_pass = eventReactive(input$bus_input_go, {
-    # print("df_pass")
+    req(val_bus_input() == T)
+    print("df_pass")
     get_pass_inputs(RVlist(), input$simul_num_routes, pass_inputs())
   })
   
@@ -62,18 +66,24 @@ app_server <- function( input, output, session ) {
     rv_pass_inputs <<- pass_inputs()
     sim <<- simulation_results()
   })
-
+  
   #SECTION: call modules========================================================
-  #=============================================================================
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   callModule(mod_output_dt_server, "summary_tab", .data = simulation_results)
   
   mod_result_viz_server("yolo_check", .data = simulation_results)
   
   mod_glassary_tab_server("glassary_tab_ui_1")
-
+  
+  mod_get_variables_server("get_variables_ui_1", .data = RVlist)
+  
+  val_bus_input = mod_input_validate_server("input_validate_ui_1", 
+                                    .data = RVlist, 
+                                    .test = reactive(input$bus_input_go))
+  
   
   #SECTION: data initialization=================================================
-  #=============================================================================
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   output$smmry_bus_routes = DT::renderDataTable({
     df_bus() %>%
       select(bus_line, bus_id, bus_route_cap, bus_arrvl_schl, bus_arrvl_actl) %>%
@@ -105,9 +115,9 @@ app_server <- function( input, output, session ) {
       theme_classic() + 
       labs(x = "Arrival Time (minutes)", 
            y = "Count")
-      
-      plotly::ggplotly(temp) %>%  
-        plotly::layout(showlegend = T,legend = list(orientation = 'h',x = 0, y = 1.05))
+    
+    plotly::ggplotly(temp) %>%  
+      plotly::layout(showlegend = T,legend = list(orientation = 'h',x = 0, y = 1.05))
   })
   
   # output$downloadData <- downloadHandler(
@@ -125,6 +135,8 @@ app_server <- function( input, output, session ) {
       map(1:as.numeric(input$simul_num), function(m) get_pass_inputs(RVlist(), input$simul_num_routes, pass_inputs()))  
     ) 
     
+    print(input$simul_num_berths)
+    
     temp_raw = tmp_raw %>%  
       pmap(function(x, y, z)
         busCapacityCalculate(x, y, rv_exit, input$simul_num_berths)
@@ -133,7 +145,7 @@ app_server <- function( input, output, session ) {
     map(1:4, function(x) get_summary_df(temp_raw, as.numeric(input$simul_num), x))
     
   })
- 
+  
   output$results_summary_stats = DT::renderDataTable({
     bind_rows(get_summry_statistics(simulation_results()[[3]]),
               get_summry_statistics(simulation_results()[[3]], grouped = T, group = "bus_line")) %>%
@@ -143,9 +155,12 @@ app_server <- function( input, output, session ) {
       dt_common(dom = "Bftir",
                 y = 600, pl = 8000)
   })
-
+  
   observe({
-    require(input$simul_num_routes)
+    req(input$simul_num_routes)
+    req(input$bus_route_pass_)
+    req(input$bus_route_cap_)
+    print("feedback fired")
     
     # Sys.sleep(2)
     
@@ -182,9 +197,27 @@ app_server <- function( input, output, session ) {
       )
     
     #SECTION: popup messages/modals===============================================
-    #=============================================================================
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #intro modal
     # modal(trigger = "", msg = includeHTML("./inst/app/www/modal_intro.html"))
+    
+    # observeEvent(input$bus_input_go, {
+    #   print("test")
+    #   
+    # })
+    
+    observeEvent(req(modal_counter == 0), {
+      showModal(modalDialog(
+        includeHTML("./inst/app/www/modal_intro.html"),
+        size = "l",
+        easyClose = TRUE
+      ))
+      modal_counter %+=% 999
+    })
+    
+    observe({
+      sluts() %>%  print()
+    })
     
     observeEvent(input$contact, {
       sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
@@ -198,7 +231,7 @@ app_server <- function( input, output, session ) {
       )
     })
     
-    observeEvent(input$dist_board, {
+    observeEvent(req(input$dist_board), {
       sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
                        tags$span(style = 'text-align: left;',
                                  tags$div(id = 'contact_table',renderPlot(make_histogram(input$pass_board, input$pass_board_sd, lmt = T))
@@ -228,14 +261,14 @@ app_server <- function( input, output, session ) {
                                                             input[[paste0(z, x)]]-input[[paste0(z, x)]]*(input[[paste0(m, x)]])/100)) %>%  
                                          dt_common(dom = "t")
                                        
-                                       )
+                                     )
                                      ))
           )}
         )
       )
     
     #plot modals for bus inputs=================================================
-    #===========================================================================
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #modals for headway density
     list(1:as.numeric(input$simul_num_routes), "dist_headway_", "bus_route_headway_", "bus_route_headway_sd_") %>%
       pmap(function(x, y, z, m)
@@ -247,7 +280,7 @@ app_server <- function( input, output, session ) {
           )}
         )
       )
-
+    
     #modals for alight density
     list(1:as.numeric(input$simul_num_routes), "dist_route_num_alight_", "bus_route_num_alight_", "bus_route_num_alight_sd_") %>%
       pmap(function(x, y, z, m)
@@ -259,7 +292,7 @@ app_server <- function( input, output, session ) {
           )}
         )
       )
-
+    
     #modals for passenger density
     list(1:as.numeric(input$simul_num_routes), "dist_route_pass_", "bus_route_pass_", "bus_route_pass_sd_") %>%
       pmap(function(x, y, z, m)
@@ -271,7 +304,7 @@ app_server <- function( input, output, session ) {
           )}
         )
       )
-
+    
   })
   
 }

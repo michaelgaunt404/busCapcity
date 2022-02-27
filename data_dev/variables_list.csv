@@ -1,70 +1,70 @@
 index,data,names_raw,names_p1,names_p2,plot_axis,Exclude,notes
-1,Bus Input,bus_line,Bus Line,Route ,-,X,-
-2,Bus Input,bus_route_pass,Bus Route Pass,Passengers per Route,-,X,-
-3,Bus Input,bus_route_cap,Bus Route Cap,Spare Capacity per Route,-,X,-
-4,Bus Input,bus_route_headway_sd,Bus Route Headway Sd,Headway Deviation (min),-,X,-
-5,Bus Input,bus_route_headway,Bus Route Headway,Headway (min),-,X,-
-6,Bus Input,bus_route_num_alight,Bus Route Num Alight,No. of Alighint Passengers ,-,X,-
-7,Bus Input,bus_route_pass_sd,Bus Route Pass Sd,-,-,X,-
-8,Bus Input,bus_route_door_cond,Bus Route Door Cond,Door Condition ,-,X,Determine if alighting/boarding is a serial or parallel process.A serial condition indicates that boarding passengers must wait for all alighing passengers to leave before boarding. A parallel door condition indicates that these processes can occur simultanesouly. 
-9,Bus Input,bus_route_num_alight_sd,Bus Route Num Alight Sd,-,-,X,-
-10,Bus Input,bus_route_size,Bus Route Size,Max Occupancy (persons),-,X,-
-11,Bus Input,bus_num,Bus Num,-,-,X,-
-12,Bus Input,bus_pass_empty_num,Bus Pass Empty Num,-,-,X,-
-13,Bus Input,bus_pass_empty_sd,Bus Pass Empty Sd,-,-,X,-
-14,Bus Input,bus_pass_alight_num,Bus Pass Alight Num,-,-,X,-
-15,Bus Input,bus_pass_alight_sd,Bus Pass Alight Sd,-,-,X,-
-16,Bus Input,bus_board_alight,Bus Board Alight,-,-,X,-
-17,Bus Input,bus_exit_condition,Bus Exit Condition,-,-,X,-
-18,Bus Input,bus_id,Bus Id,-,-,X,-
-19,Bus Input,bus_arrvl_schl,Bus Arrvl Schl,-,-,X,-
-20,Bus Input,bus_pass_empty,Bus Pass Empty,-,-,X,-
-21,Bus Input,bus_pass_alight,Bus Pass Alight,-,-,X,-
-22,Bus Input,bus_service_time_alight,Bus Service Time Alight,-,-,X,-
-23,Bus Input,bus_obstrct_time,Bus Obstrct Time,-,-,X,-
-24,Bus Input,bus_surplus_seats,Bus Surplus Seats,-,-,X,-
 25,Bus Input,bus_arrvl_actl,Bus Arrvl Actl,-,-,X,-
-26,Bus Input,bus_line_id,Bus Line Id,-,-,X,-
-27,Bus Input,simulation_num,Simulation Num,-,-,X,-
-28,Pass Input,bus_line,Bus Line,-,-,X,-
-29,Pass Input,pass_id,Pass Id,-,-,X,-
-30,Pass Input,pass_arrvl,Pass Arrvl,-,-,X,-
-31,Pass Input,pass_board,Pass Board,-,-,X,-
-32,Pass Input,pass_id_line,Pass Id Line,-,-,X,-
-33,Pass Input,simulation_num,Simulation Num,-,-,X,-
-34,Simulation Output,bus_line_id,Bus Line Id,Route/No.,-,X,-
-35,Simulation Output,bus_line,Bus Line,Route,-,X,-
-36,Simulation Output,pass_id,Pass Id,-,-,X,-
-37,Simulation Output,pass_arrvl,Pass Arrvl,Pass. Arrival,Seconds,X,When a passenger was calacualted to arrive given inputs.
-38,Simulation Output,pass_board,Pass Board,Pass. Boarding/Alighting Duration,-,X,-
-39,Simulation Output,pass_id_line,Pass Id Line,Route/Pass ID,-,X,-
-40,Simulation Output,bus_id,Bus Id,-,-,X,-
-41,Simulation Output,bus_arrvl_actl,Bus Actual Arrival,-,Seconds,X,-
-42,Simulation Output,bus_pass_empty,Bus Pass Empty,-,Persons,X,-
+41,Simulation Output,bus_arrvl_actl,Bus Actual Arrival,-,Seconds,X,Time simulated bus actually arrives - the arrival standard deviation provided by the user is applied to scheduled arrival times. 
+19,Bus Input,bus_arrvl_schl,Bus Scheduled Arrival,-,-,X,Scheduled time when bus should arrive at berth - calculated from headway and intialized off {Time = 0}.
 49,Simulation Output,bus_bay_assign,Bay Assignment,Assinged Berth,Bays,0,-
-53,Simulation Output,bus_service_stop,Bus Service Stop,Service Stopped,-,X,-
-50,Simulation Output,bus_delay_entry,Delay - Bay Entry,Delayed Entry,Seconds,0,-
-46,Simulation Output,bus_route_door_cond,Bus Route Door Cond,Door Condition,-,X,-
-47,Simulation Output,i,I,-,-,X,-
+16,Bus Input,bus_board_alight,Bus Board Alight,-,-,X,-
 48,Simulation Output,bus_board_start,Bus Board Start,Service Commenced,Seconds,X,Time when bus begins to board and alight 
+50,Simulation Output,bus_delay_entry,Delay - Bay Entry,Delayed Entry,Seconds,0,-
 54,Simulation Output,bus_delay_exit,Delay - Bay Exit ,Delayed Exit,Seconds,0,-
 59,Simulation Output,bus_delay_total,Delay - Total ,Total Delay,Seconds,0,-
+57,Simulation Output,bus_delayed_by_queue,Bus Delayed By Queue,-,Seconds,X,Flag - 0 means bus not delayed
+56,Simulation Output,bus_exit_actual,Bus Exit Actual,Berth Exit,Seconds,X,-
+17,Bus Input,bus_exit_condition,Bus Exit Condition,-,-,X,-
+18,Bus Input,bus_id,Bus Id,-,-,X,-
+40,Simulation Output,bus_id,Bus Id,-,-,X,-
+1,Bus Input,bus_line,Bus Line,Route ,-,X,-
+28,Pass Input,bus_line,Bus Line,-,-,X,-
+35,Simulation Output,bus_line,Bus Line,Route,-,X,-
+64,Missed Passengers List,bus_line,Bus Line,-,-,X,-
+26,Bus Input,bus_line_id,Bus Line Id,-,-,X,-
+34,Simulation Output,bus_line_id,Bus Line Id,Route/No.,-,X,-
+60,Simulation Output,bus_no_pick_up,Bus No Pick Up,Passengers Picked-up?,-,X,Flag - 0 means bus did not pick anyone up
+11,Bus Input,bus_num,Bus Num,-,-,X,Number of buses per route per simulation duration. 
+23,Bus Input,bus_obstrct_time,Bus Obstrct Time,-,-,X,-
+21,Bus Input,bus_pass_alight,Bus Pass Alight,-,-,X,-
 43,Simulation Output,bus_pass_alight,No. Alighting Passengers,No. of Alighting  Passengers,Persons,0,-
+14,Bus Input,bus_pass_alight_num,Bus Pass Alight Num,-,-,X,-
+15,Bus Input,bus_pass_alight_sd,Bus Pass Alight Sd,-,-,X,-
+20,Bus Input,bus_pass_empty,Bus Pass Empty,-,-,X,-
+42,Simulation Output,bus_pass_empty,Bus Pass Empty,-,Persons,X,-
+12,Bus Input,bus_pass_empty_num,Bus Pass Empty Num,-,-,X,Number of empty seats when bus arrives at berth. Calculated using  bus_route_cap and bus_route_size.
+13,Bus Input,bus_pass_empty_sd,Bus Pass Empty Sd,-,-,X,Placeholder - always zero. Could be incorperated to add vairance in number of empty seats.
 58,Simulation Output,bus_pass_picked_up,No. Boarding Passengers,No. of Boarding  Passengers,Persons,0,-
-45,Simulation Output,bus_surplus_seats,No. Surplus Seats,No. Surplus Seats,Persons,0,-
+3,Bus Input,bus_route_cap,Bus Route Cap,Spare Capacity per Route,-,X,Spare capacity percentage for bus routes as they enter berths. Percent of bus that is empty when arriving at berth.
+8,Bus Input,bus_route_door_cond,Bus Route Door Cond,Door Condition ,-,X,Determine if alighting/boarding is a serial or parallel process.A serial condition indicates that boarding passengers must wait for all alighing passengers to leave before boarding. A parallel door condition indicates that these processes can occur simultanesouly. 
+46,Simulation Output,bus_route_door_cond,Bus Route Door Cond,Door Condition,-,X,-
+5,Bus Input,bus_route_headway,Bus Route Headway,Headway (min),-,X,-
+4,Bus Input,bus_route_headway_sd,Bus Route Headway Sd,Headway Deviation (min),-,X,-
+6,Bus Input,bus_route_num_alight,Bus Route Num Alight,No. of Alighint Passengers ,-,X,-
+9,Bus Input,bus_route_num_alight_sd,Bus Route Num Alight Sd,-,-,X,-
+2,Bus Input,bus_route_pass,Bus Route Pass,Passengers per Route,-,X,-
+7,Bus Input,bus_route_pass_sd,Bus Route Pass Sd,-,-,X,-
+10,Bus Input,bus_route_size,Bus Route Size,Max Occupancy (persons),-,X,-
+53,Simulation Output,bus_service_stop,Bus Service Stop,Service Stopped,-,X,-
+52,Simulation Output,bus_service_time,Service Time -Total,-,Seconds,0,-
+22,Bus Input,bus_service_time_alight,Bus Service Time Alight,-,-,X,-
 44,Simulation Output,bus_service_time_alight,Service Time - Alight,-,Seconds,0,-
 51,Simulation Output,bus_service_time_board,Service Time - Board,Service Time - Boarding,Seconds,0,-
-56,Simulation Output,bus_exit_actual,Bus Exit Actual,Berth Exit,Seconds,X,-
-57,Simulation Output,bus_delayed_by_queue,Bus Delayed By Queue,-,Seconds,X,Flag - 0 means bus not delayed
-52,Simulation Output,bus_service_time,Service Time -Total,-,Seconds,0,-
+24,Bus Input,bus_surplus_seats,Bus Surplus Seats,-,-,X,Sum total of empty seats on a bus - calculated using spare capacity and number of alighting passengers. Upper limit of for potential boarding passengers.
+45,Simulation Output,bus_surplus_seats,No. Surplus Seats,No. Surplus Seats,Persons,0,Sum total of empty seats on a bus - calculated using spare capacity and number of alighting passengers. Upper limit of for potential boarding passengers.
 55,Simulation Output,bus_time_inBerth,Total Time in Bay ,-,Seconds,0,-
-60,Simulation Output,bus_no_pick_up,Bus No Pick Up,Passengers Picked-up?,-,X,Flag - 0 means bus did not pick anyone up
-61,Simulation Output,pass_wait,Pass Wait,Passenger Wait Time,-,X,-
-62,Simulation Output,simulation_num,Simulation Num,-,-,X,-
 63,Simulation Output,bus_total_operation,Total Operation Duration,-,-,0,"Total time to enter, service, and exit"
-64,Missed Passengers List,bus_line,Bus Line,-,-,X,-
-65,Missed Passengers List,pass_id,Pass Id,-,-,X,-
+47,Simulation Output,i,I,-,-,X,-
+30,Pass Input,pass_arrvl,Pass Arrvl,-,-,X,-
+37,Simulation Output,pass_arrvl,Pass Arrvl,Pass. Arrival,Seconds,X,When a passenger was calacualted to arrive given inputs.
 66,Missed Passengers List,pass_arrvl,Pass Arrvl,-,-,X,-
+31,Pass Input,pass_board,Pass Board,-,-,X,-
+38,Simulation Output,pass_board,Pass Board,Pass. Boarding/Alighting Duration,-,X,-
 67,Missed Passengers List,pass_board,Pass Board,-,-,X,-
+29,Pass Input,pass_id,Pass Id,-,-,X,-
+36,Simulation Output,pass_id,Pass Id,-,-,X,-
+65,Missed Passengers List,pass_id,Pass Id,-,-,X,-
+32,Pass Input,pass_id_line,Pass Id Line,-,-,X,-
+39,Simulation Output,pass_id_line,Pass Id Line,Route/Pass ID,-,X,-
 68,Missed Passengers List,pass_id_line,Pass Id Line,-,-,X,-
+61,Simulation Output,pass_wait,Pass Wait,Passenger Wait Time,-,X,-
+27,Bus Input,simulation_num,Simulation Num,-,-,X,-
+33,Pass Input,simulation_num,Simulation Num,-,-,X,-
+62,Simulation Output,simulation_num,Simulation Num,-,-,X,-
 69,Missed Passengers List,simulation_num,Simulation Num,-,-,X,-

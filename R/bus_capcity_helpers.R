@@ -41,10 +41,10 @@ extra_delay_gaps = function(input_list_flow){
 
 #creates big list for xtra_delays
 make_bus_delay = function(xtra_delay_list, col_q_dly, col_brd_dwll){
-  case_when(xtra_delay_list[["exit_cond_status"]] == "1" ~ 0,
-            xtra_delay_list[["exit_cond_status"]] == "2" ~ 0,
-            xtra_delay_list[["exit_cond_status"]] == "3" ~ extra_delay_signal(col_q_dly, col_brd_dwll, xtra_delay_list), #take extra_delay_signal function
-            xtra_delay_list[["exit_cond_status"]] == "4" ~ extra_delay_gaps(xtra_delay_list)
+  case_when(xtra_delay_list[["exit_cond_status"]] == "1" ~ 0
+            ,xtra_delay_list[["exit_cond_status"]] == "2" ~ 0
+            ,xtra_delay_list[["exit_cond_status"]] == "3" ~ extra_delay_signal(col_q_dly, col_brd_dwll, xtra_delay_list) #add extra_delay_signal function
+            ,xtra_delay_list[["exit_cond_status"]] == "4" ~ extra_delay_gaps(xtra_delay_list) #add extra_delay_signal function
   )
 }
 
@@ -214,10 +214,14 @@ get_pass_inputs =  function(rvList, num_of_buses, pass_input_list){
 busCapacityCalculate = function(df_bus, df_pass, xtra_delay_list, berths){
   #run if trouble shooting
   # df_bus = tmp_raw[[1]][[1]]; df_pass = tmp_raw[[2]][[1]]; xtra_delay_list =  rv_exit; berths = 1;
+  # df_bus = data[[1]]; df_pass = data[[2]]; xtra_delay_list =  rv_exit; berths = 3; #use with recent data
+  # simulation = data[[3]]
   
   #need try_catch error and messages
   #need default numbers 
   #what is behavior for bus without a full load - does it wait some amount of time?
+  
+  print(paste0("Number of berths: ", berths))
   
   # quick initialization
   i = 0
@@ -225,35 +229,100 @@ busCapacityCalculate = function(df_bus, df_pass, xtra_delay_list, berths){
   left_list = list()
   already_left = 0
   current_queue_penalty = 0 #needs to account for exit delay but now only consists of pass_board_total
-  current_open_bay = 1
-  bus_exit_actual = 0
+  current_open_bay = 1 #starts first bay
+  bus_exit_actual_init = 0
   
   for (i in 1:length(df_bus$bus_line_id) ){
-    bus_board_start = (df_bus[i, "bus_arrvl_actl"] + current_queue_penalty) 
+    print(i)
+    print(paste0("check: ", (bus_exit_actual_init < df_bus[i+1, "bus_arrvl_actl"][[1]])))
+    print(paste0("current_queue_penalty: ", current_queue_penalty))
+    print(paste0("current_open_bay: ", current_open_bay))
+    # bus_board_start = (df_bus[i, "bus_arrvl_actl"] + current_queue_penalty) #dont need to do this - i do it in df below
+    
+    #makes passenger relevant to bus[[i]]
+    # rel_pass_list = df_pass %>%  
+    #   filter(pass_id_line %not_in% already_left) %>% 
+    #   filter(pass_arrvl < bus_board_start[[1]]) %>% #gets all passengers at stop before bus arrival 
+    #   filter(bus_line == df_bus[[i, "bus_line"]]) %>% #gets only relevant passengers for given bys
+    #   .[1:df_bus[i, "bus_surplus_seats"][[1]], ] #NA values difference beween people alighting and boarding
+    # 
+    # #augments above df to have bus attributes 
+    # rel_pass_list_aug = rel_pass_list %>% 
+    #   mutate(bus_line_id = paste0(df_bus[i, "bus_line"], "_", df_bus[i, "bus_id"])) %>% #assigns bus_line/id to passengers
+    #   merge.data.frame(., df_bus %>% 
+    #                      select(bus_id, bus_line_id, bus_arrvl_actl, bus_pass_empty, bus_pass_alight, bus_service_time_alight, bus_surplus_seats,  bus_route_door_cond), 
+    #                    by = c("bus_line_id"), all.x = T)
+    # 
+    # 
+    # #performs important calculations for simulations 
+    # temp = rel_pass_list_aug %>% 
+    #   mutate(bus_line = bus_line_id %>% gsub('(.*)_\\w+', '\\1', .)
+    #          ,i = i
+    #          ,bus_board_start = bus_board_start #adds when bus starts operation - includes entry penalty
+    #          ,bus_bay_assign = current_open_bay #assigns bay to bus - created in previous loop or initialization
+    #          ,bus_delay_entry = bus_board_start-df_bus[i, "bus_arrvl_actl"] #calculates entry delay from theoretical start
+    #          ,bus_service_time_board = sum(pass_board, na.rm = T )
+    #          ,bus_service_time = case_when(bus_route_door_cond == "Series" ~ bus_service_time_alight + bus_service_time_board, 
+    #                                        T~max(bus_service_time_alight, bus_service_time_board)) #ttl service time based on door condition
+    #          ,bus_service_stop = bus_board_start + bus_service_time) #determines when bus stops
+    
+    
+    # temp %>%  
+    #   mutate(bus_delay_exit_cond_1 = bus_exit_actual-bus_service_stop
+    #          ,)
+    # 
+    # temp %>%  
+    #   mutate(bus_delay_exit = case_when(temp$bus_service_stop[1] < bus_exit_actual ~ (bus_exit_actual-bus_service_stop), 
+    #                                     ,T
+    #                                     ,T & xtra_delay_list[["exit_cond_status"]] == "1" ~ 0
+    #                                     ,T & xtra_delay_list[["exit_cond_status"]] == "2" ~ 0))
+    #                                     ,T~make_bus_delay(xtra_delay_list, temp$bus_delay_entry[1], temp$bus_service_time[1]))
+    #   )
+    # 
+    # 
+    # 
+    #   mutate(bus_delay_exit = case_when(bus_service_stop < bus_exit_actual ~ (bus_exit_actual-bus_service_stop), 
+    #                                     T~make_bus_delay(xtra_delay_list, temp$bus_delay_entry[1], temp$bus_service_time[1]))
+    #   )
+    #          ,bus_time_inBerth = bus_delay_exit + bus_service_time
+    #          ,bus_exit_actual = bus_board_start + bus_time_inBerth
+    #          ,bus_delayed_by_queue = case_when(bus_delay_entry == 0~0,
+    #                                            bus_delay_entry != 0~1)
+    #          ,bus_pass_picked_up = bus_surplus_seats-sum(is.na(pass_id))
+    #          ,bus_delay_total = bus_delay_entry + bus_delay_exit
+    #          ,bus_total_operation = bus_delay_entry  + bus_service_time + bus_delay_exit
+    #          ,bus_no_pick_up = case_when(bus_pass_picked_up == 0~0,
+    #                                      bus_pass_picked_up != 0~1)
+    #   )
+    # temp %>%  colnames()
+    # temp  %>%  
+    #   mutate(yolo = make_bus_delay(xtra_delay_list, bus_delay_entry, bus_service_time))
+    # 
+    # make_bus_delay
+    # identical(left_list[[i]], temp)
     
     left_list[[i]] = df_pass %>%  
       filter(pass_id_line %not_in% already_left) %>% 
       filter(pass_arrvl < bus_board_start[[1]]) %>% #gets all passengers at stop before bus arrival 
-      filter(bus_line == df_bus[[i, "bus_line"]]) %>% #gets only relevant passengers
+      filter(bus_line == df_bus[[i, "bus_line"]]) %>% #gets only relevant passengers for given bys
       .[1:df_bus[i, "bus_surplus_seats"][[1]], ] %>% #this pipe should end hear and and become its own object to include a wait period - maybe %>%  
       # na.omit() %>% #need to filter NA rows - occurs if theres less ppl at stop than bus surplus
-      mutate(bus_line_id = paste0(df_bus[i, "bus_line"], "_", df_bus[i, "bus_id"])) %>% 
+      mutate(bus_line_id = paste0(df_bus[i, "bus_line"], "_", df_bus[i, "bus_id"])) %>% #assigns bus_line/id to passengers
       merge.data.frame(., df_bus %>% 
                          select(bus_id, bus_line_id, bus_arrvl_actl, bus_pass_empty, bus_pass_alight, bus_service_time_alight, bus_surplus_seats,  bus_route_door_cond), 
-                       by = c("bus_line_id"), all.x = T) %>% 
-      mutate(bus_line = bus_line_id %>%  
-               gsub('(.*)_\\w+', '\\1', .),
+                       by = c("bus_line_id"), all.x = T) %>% #merges df_bus attributes to passenger list
+      mutate(bus_line = bus_line_id %>% gsub('(.*)_\\w+', '\\1', .), 
              i = i,
-             bus_board_start = bus_board_start,
+             bus_board_start = bus_arrvl_actl + current_queue_penalty,
              bus_bay_assign = current_open_bay, 
-             bus_delay_entry = bus_board_start-df_bus[i, "bus_arrvl_actl"],
+             bus_delay_entry = current_queue_penalty,
              bus_service_time_board = sum(pass_board, na.rm = T ),
              bus_service_time = case_when(bus_route_door_cond == "Series" ~ bus_service_time_alight + bus_service_time_board, 
-                                          T~max(bus_service_time_alight,bus_service_time_board))) %>% 
-      data.table::data.table() %>% 
+                                          T~max(bus_service_time_alight, bus_service_time_board))) %>% 
       mutate(bus_service_stop = bus_board_start + bus_service_time) %>% 
-      mutate(bus_delay_exit = case_when(bus_service_stop < bus_exit_actual ~ (bus_exit_actual-bus_service_stop), 
-                                        T~make_bus_delay(xtra_delay_list, bus_delay_entry, bus_service_time)),
+      mutate(bus_delay_exit = 0, 
+             # bus_delay_exit = case_when(bus_service_stop < bus_exit_actual_init ~ (bus_exit_actual_init-bus_service_stop),
+             #                            T~make_bus_delay(xtra_delay_list, bus_delay_entry, bus_service_time)),
              bus_time_inBerth = bus_delay_exit + bus_service_time,
              bus_exit_actual = bus_board_start + bus_time_inBerth,
              bus_delayed_by_queue = case_when(bus_delay_entry == 0~0,
@@ -265,21 +334,22 @@ busCapacityCalculate = function(df_bus, df_pass, xtra_delay_list, berths){
                                         bus_pass_picked_up != 0~1)
       ) 
     
-    bus_exit_actual = left_list[[i]]$bus_exit_actual[1]
-    bus_interference_check = (bus_exit_actual < df_bus[i+1, "bus_arrvl_actl"][[1]])
+    print(bus_exit_actual_init)
+    bus_exit_actual_init = left_list[[i]][[1, "bus_exit_actual"]][[1]]
+    bus_interference_check = (bus_exit_actual_init < df_bus[i+1, "bus_arrvl_actl"][[1]]) #FALSE means interference
     bus_interference_check = ifelse(is.na(bus_interference_check), T, bus_interference_check)
     
     if (bus_interference_check){
-      #no interference always reset nerth assignment to 1
+      #no interference always reset berth assignment to 1
       current_open_bay = 1
       current_queue_penalty = 0
     } else {
-      if (current_open_bay == berths ) {
+      if (current_open_bay == berths) {
         #if at last berth, assign to first with time penalty
         current_open_bay = 1
-        current_queue_penalty = (bus_exit_actual - df_bus[i+1, "bus_arrvl_actl"])
+        current_queue_penalty = (bus_exit_actual_init - df_bus[i+1, "bus_arrvl_actl"][[1]])
       } else {
-        current_open_bay %+=% 1
+        current_open_bay = current_open_bay + 1
         current_queue_penalty = 0
       }
     }

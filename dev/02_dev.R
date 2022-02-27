@@ -31,6 +31,8 @@
 # golem::add_module(name = "input_feedback" ) # made already
 # golem::add_module(name = "glassary_tab" ) # made already
 # golem::add_module(name = "result_viz") # made already
+# golem::add_module(name = "input_validate") # made al
+golem::add_module(name = "dev_test") # made already
 
 golem::add_module(name = "check") # made already
 
