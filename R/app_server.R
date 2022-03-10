@@ -156,11 +156,11 @@ app_server <- function( input, output, session ) {
                 y = 600, pl = 8000)
   })
   
-  observe({
-    req(input$simul_num_routes)
-    req(input$bus_route_pass_)
-    req(input$bus_route_cap_)
-    print("feedback fired")
+  # observe({
+  #   req(input$simul_num_routes)
+  #   req(input$bus_route_pass_)
+  #   req(input$bus_route_cap_)
+  #   print("feedback fired")
     
     # Sys.sleep(2)
     
@@ -196,117 +196,115 @@ app_server <- function( input, output, session ) {
         )
       )
     
-    #SECTION: popup messages/modals===============================================
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #intro modal
-    # modal(trigger = "", msg = includeHTML("./inst/app/www/modal_intro.html"))
-    
-    # observeEvent(input$bus_input_go, {
-    #   print("test")
-    #   
-    # })
-    
-    observeEvent(req(modal_counter == 0), {
-      showModal(modalDialog(
-        includeHTML("./inst/app/www/modal_intro.html"),
-        size = "l",
-        easyClose = TRUE
-      ))
-      modal_counter %+=% 999
-    })
-    
-    observe({
-      sluts() %>%  print()
-    })
-    
-    observeEvent(input$contact, {
-      sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
-                       tags$span(style = 'text-align: left;',
-                                 tags$h3('Contact Us', style = 'color: #d73926;'),
-                                 tags$h4('The Data Informatics Group', style = 'font-weight: 700;'),
-                                 tags$p('Based in Seattle, the Data Informatics Group specializes in creating bespoke data \
-                              products that daylight powerful insights and enable our clients to harness the \
-                              full-potential of their data. Reach out to us!'),
-                                 tags$div(id = 'contact_table', render_contact_table()))
-      )
-    })
-    
-    observeEvent(req(input$dist_board), {
-      sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
-                       tags$span(style = 'text-align: left;',
-                                 tags$div(id = 'contact_table',renderPlot(make_histogram(input$pass_board, input$pass_board_sd, lmt = T))
-                                 ))
-      )
-    })
-    
-    observeEvent(input$dist_alight, {
-      sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
-                       tags$span(style = 'text-align: left;',
-                                 tags$div(id = 'contact_table', renderPlot(make_histogram(input$pass_alight, input$pass_alight_sd, lmt = T))
-                                 ))
-      )
-    })
-    
-    
-    #modals for capacity count
-    list(1:as.numeric(input$simul_num_routes), "bus_size_", "bus_route_size_", "bus_route_cap_") %>%
-      pmap(function(x, y, z, m)
-        observeEvent(input[[paste0(y, x)]], {
-          sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
-                           tags$span(style = 'text-align: left;',
-                                     tags$div(id = 'contact_table', DT::renderDT(
-                                       data.frame(Variable = c("Bus Maximum Capcity", "No. of Empty Seats", "No. Passengers Onboard"), 
-                                                  Count = c(input[[paste0(z, x)]], 
-                                                            input[[paste0(z, x)]]*(input[[paste0(m, x)]])/100, 
-                                                            input[[paste0(z, x)]]-input[[paste0(z, x)]]*(input[[paste0(m, x)]])/100)) %>%  
-                                         dt_common(dom = "t")
-                                       
-                                     )
-                                     ))
-          )}
-        )
-      )
-    
-    #plot modals for bus inputs=================================================
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #modals for headway density
-    list(1:as.numeric(input$simul_num_routes), "dist_headway_", "bus_route_headway_", "bus_route_headway_sd_") %>%
-      pmap(function(x, y, z, m)
-        observeEvent(input[[paste0(y, x)]], {
-          sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
-                           tags$span(style = 'text-align: left;',
-                                     tags$div(id = 'contact_table', renderPlot(make_density(input[[paste0(z, x)]], input[[paste0(m, x)]]))
-                                     ))
-          )}
-        )
-      )
-    
-    #modals for alight density
-    list(1:as.numeric(input$simul_num_routes), "dist_route_num_alight_", "bus_route_num_alight_", "bus_route_num_alight_sd_") %>%
-      pmap(function(x, y, z, m)
-        observeEvent(input[[paste0(y, x)]], {
-          sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
-                           tags$span(style = 'text-align: left;',
-                                     tags$div(id = 'contact_table', renderPlot(make_density(input[[paste0(z, x)]], input[[paste0(m, x)]]))
-                                     ))
-          )}
-        )
-      )
-    
-    #modals for passenger density
-    list(1:as.numeric(input$simul_num_routes), "dist_route_pass_", "bus_route_pass_", "bus_route_pass_sd_") %>%
-      pmap(function(x, y, z, m)
-        observeEvent(input[[paste0(y, x)]], {
-          sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
-                           tags$span(style = 'text-align: left;',
-                                     tags$div(id = 'contact_table', renderPlot(make_density(input[[paste0(z, x)]], input[[paste0(m, x)]]))
-                                     ))
-          )}
-        )
-      )
-    
+  # })
+  
+  #SECTION: popup messages/modals===============================================
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  #intro modal
+  # modal(trigger = "", msg = includeHTML("./inst/app/www/modal_intro.html"))
+  
+  # observeEvent(input$bus_input_go, {
+  #   print("test")
+  #   
+  # })
+  
+  observeEvent(req(modal_counter == 0), {
+    showModal(modalDialog(
+      includeHTML("./inst/app/www/modal_intro.html"),
+      size = "l",
+      easyClose = TRUE
+    ))
+    modal_counter %+=% 999
   })
   
+  observeEvent(input$contact, {
+    sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
+                     tags$span(style = 'text-align: left;',
+                               tags$h3('Contact Us', style = 'color: #d73926;'),
+                               tags$h4('The Data Informatics Group', style = 'font-weight: 700;'),
+                               tags$p('Based in Seattle, the Data Informatics Group specializes in creating bespoke data \
+                              products that daylight powerful insights and enable our clients to harness the \
+                              full-potential of their data. Reach out to us!'),
+                               tags$div(id = 'contact_table', render_contact_table()))
+    )
+  })
+  
+  observeEvent(req(input$dist_board), {
+    sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
+                     tags$span(style = 'text-align: left;',
+                               tags$div(id = 'contact_table',renderPlot(make_histogram(input$pass_board, input$pass_board_sd, lmt = T))
+                               ))
+    )
+  })
+  
+  observeEvent(input$dist_alight, {
+    sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
+                     tags$span(style = 'text-align: left;',
+                               tags$div(id = 'contact_table', renderPlot(make_histogram(input$pass_alight, input$pass_alight_sd, lmt = T))
+                               ))
+    )
+  })
+  
+  
+  #modals for capacity count
+  list(1:as.numeric(input$simul_num_routes), "bus_size_", "bus_route_size_", "bus_route_cap_") %>%
+    pmap(function(x, y, z, m)
+      observeEvent(input[[paste0(y, x)]], {
+        sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
+                         tags$span(style = 'text-align: left;',
+                                   tags$div(id = 'contact_table', DT::renderDT(
+                                     data.frame(Variable = c("Bus Maximum Capcity", "No. of Empty Seats", "No. Passengers Onboard"), 
+                                                Count = c(input[[paste0(z, x)]], 
+                                                          input[[paste0(z, x)]]*(input[[paste0(m, x)]])/100, 
+                                                          input[[paste0(z, x)]]-input[[paste0(z, x)]]*(input[[paste0(m, x)]])/100)) %>%  
+                                       dt_common(dom = "t")
+                                     
+                                   )
+                                   ))
+        )}
+      )
+    )
+  
+  #plot modals for bus inputs=================================================
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  #modals for headway density
+  list(1:as.numeric(input$simul_num_routes), "dist_headway_", "bus_route_headway_", "bus_route_headway_sd_") %>%
+    pmap(function(x, y, z, m)
+      observeEvent(input[[paste0(y, x)]], {
+        sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
+                         tags$span(style = 'text-align: left;',
+                                   tags$div(id = 'contact_table', renderPlot(make_density(input[[paste0(z, x)]], input[[paste0(m, x)]]))
+                                   ))
+        )}
+      )
+    )
+  
+  #modals for alight density
+  list(1:as.numeric(input$simul_num_routes), "dist_route_num_alight_", "bus_route_num_alight_", "bus_route_num_alight_sd_") %>%
+    pmap(function(x, y, z, m)
+      observeEvent(input[[paste0(y, x)]], {
+        sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
+                         tags$span(style = 'text-align: left;',
+                                   tags$div(id = 'contact_table', renderPlot(make_density(input[[paste0(z, x)]], input[[paste0(m, x)]]))
+                                   ))
+        )}
+      )
+    )
+  
+  #modals for passenger density
+  list(1:as.numeric(input$simul_num_routes), "dist_route_pass_", "bus_route_pass_", "bus_route_pass_sd_") %>%
+    pmap(function(x, y, z, m)
+      observeEvent(input[[paste0(y, x)]], {
+        sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
+                         tags$span(style = 'text-align: left;',
+                                   tags$div(id = 'contact_table', renderPlot(make_density(input[[paste0(z, x)]], input[[paste0(m, x)]]))
+                                   ))
+        )}
+      )
+    )
+  
+# })
+
 }
 
 
