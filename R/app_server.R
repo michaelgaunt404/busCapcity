@@ -156,13 +156,57 @@ app_server <- function( input, output, session ) {
                 y = 600, pl = 8000)
   })
   
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  #SECTION: popup messages/modals===============================================
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  #general modals that do not need to be wrapped by any special event wrapper
+  
+  observeEvent(req(modal_counter == 0), {
+    showModal(modalDialog(
+      includeHTML("./inst/app/www/modal_intro.html"),
+      size = "l",
+      easyClose = TRUE
+    ))
+    modal_counter %+=% 999
+  })
+  
+  observeEvent(input$contact, {
+    sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
+                     tags$span(style = 'text-align: left;',
+                               tags$h3('Contact Us', style = 'color: #d73926;'),
+                               tags$h4('The Data Informatics Group', style = 'font-weight: 700;'),
+                               tags$p('Based in Seattle, the Data Informatics Group specializes in creating bespoke data \
+                              products that daylight powerful insights and enable our clients to harness the \
+                              full-potential of their data. Reach out to us!'),
+                               tags$div(id = 'contact_table', render_contact_table()))
+    )
+  })
+  
+  
+  
+  ###SUBSECTION: popup messages/modals==========================================
+  ###~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  #special modals which are programmaticly made using bus inputs
+  #need to wrapped in observe statement
+  
   observe({
     req(input$simul_num_routes)
-    req(input$bus_route_pass_)
-    req(input$bus_route_cap_)
-    print("feedback fired")
-    
-    # Sys.sleep(2)
+
     
     #bus route capacity
     list(1:as.numeric(input$simul_num_routes), "bus_route_cap_", "Must be 0 <> 100", ">100") %>%
@@ -195,41 +239,7 @@ app_server <- function( input, output, session ) {
         }
         )
       )
-    
-    #SECTION: popup messages/modals===============================================
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #intro modal
-    # modal(trigger = "", msg = includeHTML("./inst/app/www/modal_intro.html"))
-    
-    # observeEvent(input$bus_input_go, {
-    #   print("test")
-    #   
-    # })
-    
-    observeEvent(req(modal_counter == 0), {
-      showModal(modalDialog(
-        includeHTML("./inst/app/www/modal_intro.html"),
-        size = "l",
-        easyClose = TRUE
-      ))
-      modal_counter %+=% 999
-    })
-    
-    observe({
-      sluts() %>%  print()
-    })
-    
-    observeEvent(input$contact, {
-      sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
-                       tags$span(style = 'text-align: left;',
-                                 tags$h3('Contact Us', style = 'color: #d73926;'),
-                                 tags$h4('The Data Informatics Group', style = 'font-weight: 700;'),
-                                 tags$p('Based in Seattle, the Data Informatics Group specializes in creating bespoke data \
-                              products that daylight powerful insights and enable our clients to harness the \
-                              full-potential of their data. Reach out to us!'),
-                                 tags$div(id = 'contact_table', render_contact_table()))
-      )
-    })
+
     
     observeEvent(req(input$dist_board), {
       sendSweetAlert(session = session, title = NULL, html = TRUE, btn_labels = c('Close'), text =
