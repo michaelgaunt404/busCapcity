@@ -32,7 +32,7 @@ app_ui <- function(request) {
       #   right = "Seattle, 2021"
       # ), #this has been messing up and the footer ends up everywhere
       #sidebar==============================================================================================================================================================================
-      sidebar = dashboardSidebar(width  = 300,
+      sidebar = dashboardSidebar(width  = 250,
                                  sidebarMenu(id = "tabs",
                                              menuItem("Simulation Setup"
                                                       # ,tabName = "db"

@@ -237,7 +237,7 @@ busCapacityCalculate = function(df_bus, df_pass, xtra_delay_list, berths){
     print(paste0("check: ", (bus_exit_actual_init < df_bus[i+1, "bus_arrvl_actl"][[1]])))
     print(paste0("current_queue_penalty: ", current_queue_penalty))
     print(paste0("current_open_bay: ", current_open_bay))
-    # bus_board_start = (df_bus[i, "bus_arrvl_actl"] + current_queue_penalty) #dont need to do this - i do it in df below
+    bus_board_start = (df_bus[i, "bus_arrvl_actl"] + current_queue_penalty) #dont need to do this - i do it in df below
     
     #makes passenger relevant to bus[[i]]
     # rel_pass_list = df_pass %>%  
